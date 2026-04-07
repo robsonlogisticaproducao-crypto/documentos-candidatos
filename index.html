@@ -1855,7 +1855,7 @@ ${text.substring(0,3500)}`;
   const r = await fetch('/api/claude', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json',  'anthropic-version': '2023-06-01',  },
-    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: msgContent }] })
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, messages: [{ role: 'user', content: msgContent }] })
   });
   if (!r.ok) { const e = await r.text(); throw new Error('Claude ' + r.status + ': ' + e.substring(0,100)); }
   const data = await r.json();
@@ -2860,7 +2860,7 @@ Retorne APENAS o JSON, sem nenhum texto antes ou depois.`;
     let apiBody;
     if (isImage) {
       apiBody = {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: safeMime, data: b64 } },
@@ -2869,7 +2869,7 @@ Retorne APENAS o JSON, sem nenhum texto antes ou depois.`;
       };
     } else if (isPdf) {
       apiBody = {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         messages: [{ role: 'user', content: [
           { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
@@ -3096,7 +3096,7 @@ async function handleAiFileUpload(event, fieldKey, candidateIdx) {
         ? (file.type === 'image/jpg' ? 'image/jpeg' : file.type)
         : 'image/jpeg';
       body = {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -3108,7 +3108,7 @@ async function handleAiFileUpload(event, fieldKey, candidateIdx) {
       };
     } else if (isPdf) {
       body = {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 200,
         messages: [{
           role: 'user',
@@ -3122,7 +3122,7 @@ async function handleAiFileUpload(event, fieldKey, candidateIdx) {
       // Text file — decode and send as text
       const textContent = atob(b64);
       body = {
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 200,
         messages: [{
           role: 'user',
