@@ -1,0 +1,3276 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)file:///C:/Users/Usuario/Downloads/index%20(4).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1118">
+<title>RH · Extrator de Candidatos</title>
+<link href="./index_files/css2" rel="stylesheet">
+<style>
+:root {
+  --bg: #080a0f; --panel: #0e1118; --card: #12151e;
+  --border: #1e2330; --border2: #252b3b;
+  --accent: #c8a96e; --accent2: #e8c98e;
+  --green: #3ecf8e; --red: #f87171; --yellow: #fbbf24; --blue: #818cf8;
+  --text: #e2e8f0; --muted: #64748b; --muted2: #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+.shell { display: flex; min-height: 100vh; }
+
+/* ── DESKTOP SIDEBAR ── */
+.sidebar {
+  width: 240px; flex-shrink: 0; background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 24px 0;
+  position: fixed; top: 0; left: 0; height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  transition: width 0.22s cubic-bezier(.4,0,.2,1);
+  z-index: 50;
+}
+.sidebar.collapsed { width: 64px; }
+.sidebar.collapsed .logo-title,
+.sidebar.collapsed .logo-sub,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .sidebar-footer { opacity: 0; pointer-events: none; width: 0; overflow: hidden; white-space: nowrap; }
+.sidebar.collapsed .nav-badge { display: none; }
+.sidebar.collapsed .nav-item span:nth-child(2) { display: none; }
+.sidebar.collapsed .logo { padding: 0 0 20px; display: flex; justify-content: center; }
+.sidebar.collapsed .logo-icon { margin: 0; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
+.sidebar.collapsed .nav-section { padding: 0 4px; }
+.sidebar-toggle {
+  position: absolute; top: 22px; right: -13px;
+  width: 26px; height: 26px; background: var(--panel);
+  border: 1px solid var(--border2); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 11px; color: var(--muted2);
+  transition: all 0.2s; z-index: 51; flex-shrink: 0;
+}
+.sidebar-toggle:hover { color: var(--accent); border-color: var(--accent); background: var(--card); }
+.main {
+  margin-left: 240px; flex: 1; padding: 36px 40px;
+  max-width: 1400px; transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+}
+.main.expanded { margin-left: 64px; }
+
+/* ── MOBILE ── */
+.mobile-header { display: none; }
+.mobile-nav    { display: none; }
+
+@media (max-width: 768px) {
+  /* Hide desktop sidebar completely */
+  .sidebar         { display: none !important; }
+  .sidebar-toggle  { display: none !important; }
+
+  /* Full width main */
+  .main {
+    margin-left: 0 !important;
+    padding: 68px 14px 78px !important;
+    max-width: 100% !important;
+    transition: none !important;
+  }
+
+  /* Mobile top header */
+  .mobile-header {
+    display: flex !important;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--panel); border-bottom: 1px solid var(--border);
+    align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
+  }
+  .mobile-header-logo { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--accent2); }
+  .mobile-header-sub  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .mobile-header-dots { display: flex; gap: 10px; }
+  .mobile-dot-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted2); }
+
+  /* Mobile bottom nav */
+  .mobile-nav {
+    display: flex !important;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: var(--panel); border-top: 1px solid var(--border);
+    padding: 6px 0;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+    justify-content: space-around;
+  }
+  .mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 6px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 10px; color: var(--muted); transition: color 0.15s;
+    min-width: 52px; position: relative;
+  }
+  .mobile-nav-item.active { color: var(--accent2); }
+  .mobile-nav-item .mn-icon { font-size: 19px; line-height: 1; }
+  .mn-badge {
+    position: absolute; top: 2px; right: 6px;
+    background: var(--accent); color: #0a0c12;
+    font-size: 9px; font-weight: 700; padding: 1px 4px;
+    border-radius: 8px; min-width: 14px; text-align: center;
+  }
+
+  /* Layout adjustments */
+  .shell          { display: block !important; }
+  .page-header h2 { font-size: 20px; }
+  .stats-grid     { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-num       { font-size: 24px !important; }
+  .stat-card      { padding: 14px 16px !important; }
+  .cands-grid     { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .docs-grid      { grid-template-columns: 1fr 1fr !important; gap: 4px !important; padding: 8px 12px 12px !important; }
+  .doc-pill       { font-size: 10px !important; padding: 4px 7px !important; }
+  .modal-overlay  { padding: 0 !important; align-items: flex-end !important; }
+  .modal          { border-radius: 20px 20px 0 0 !important; max-height: 92vh !important; width: 100% !important; max-width: 100% !important; }
+  .modal-header   { padding: 18px 16px 14px !important; }
+  .modal-body     { padding: 14px 16px 20px !important; }
+  #modalMissingDocs { padding: 10px 16px 0 !important; }
+  .docs-checklist { grid-template-columns: 1fr !important; }
+  .data-grid      { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .log-panel      { height: 110px !important; font-size: 11px !important; }
+  .cand-list      { max-height: 200px !important; }
+  .btn            { padding: 10px 14px !important; font-size: 12px !important; }
+  .btn-row        { gap: 8px !important; flex-wrap: wrap !important; }
+  .search-bar     { flex-wrap: wrap !important; }
+  .search-input   { width: 100% !important; }
+  .filter-btn     { flex: 1 !important; text-align: center !important; font-size: 11px !important; padding: 8px 4px !important; }
+  .btn-whatsapp   { width: 100% !important; justify-content: center !important; }
+  .results-header { flex-direction: column !important; gap: 10px !important; }
+  .table-scroll   { -webkit-overflow-scrolling: touch; }
+  .divider        { margin: 0 0 18px !important; }
+  .completion-ring { padding: 12px !important; }
+}
+
+@media (max-width: 380px) {
+  .main       { padding: 64px 10px 72px !important; }
+  .docs-grid  { grid-template-columns: 1fr !important; }
+  .data-grid  { grid-template-columns: 1fr !important; }
+}
+.logo { padding: 0 24px 32px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+.logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 12px; }
+.logo-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--accent2); line-height: 1.2; }
+.logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+.nav-section { padding: 0 16px; margin-bottom: 8px; }
+.nav-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 0 8px; margin-bottom: 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--muted2); cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+.nav-item:hover { background: var(--card); color: var(--text); }
+.nav-item.active { background: rgba(200,169,110,0.1); color: var(--accent2); }
+.nav-badge { margin-left: auto; background: rgba(200,169,110,0.15); color: var(--accent); font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 600; }
+.sidebar-footer { margin-top: auto; padding: 20px 24px 0; border-top: 1px solid var(--border); }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; }
+.status-dot.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.step { display: none; } .step.active { display: block; }
+.page-header { margin-bottom: 28px; }
+.page-header h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--accent2); margin-bottom: 6px; }
+.page-header p { font-size: 14px; color: var(--muted2); }
+.divider { height: 1px; background: var(--border); margin: 0 0 28px; }
+.config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.field input { background: var(--card); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 14px; color: var(--text); font-family: 'Inter', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
+.field input:focus { border-color: var(--accent); }
+.field .hint { font-size: 11px; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.btn-gold { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0c12; }
+.btn-gold:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,169,110,0.3); }
+.btn-gold:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-outline { background: transparent; color: var(--muted2); border: 1px solid var(--border2); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-ghost { background: transparent; color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+.btn-ghost:hover { background: rgba(248,113,113,0.06); }
+.btn-blue { background: transparent; color: var(--blue); border: 1px solid rgba(129,140,248,0.3); }
+.btn-blue:hover { background: rgba(129,140,248,0.08); }
+.btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); }
+.stat-num { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--accent2); line-height: 1; margin-bottom: 6px; }
+.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.progress-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+.progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.progress-label { font-size: 13px; color: var(--muted2); }
+.progress-pct { font-size: 13px; color: var(--accent); font-weight: 600; }
+.progress-bar { background: var(--border2); border-radius: 4px; height: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+.cand-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; max-height: 320px; overflow-y: auto; }
+.cand-item { display: flex; align-items: center; gap: 14px; padding: 11px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.cand-item:last-child { border-bottom: none; }
+.cand-item:hover { background: rgba(255,255,255,0.02); }
+.cand-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #1e2330, #252b3b); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted2); flex-shrink: 0; }
+.cand-name { flex: 1; font-size: 13px; }
+.cand-date { font-size: 11px; color: var(--muted); margin-right: 8px; }
+.cand-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.15s; position: relative; user-select: none; }
+.cand-status:hover { opacity: 0.82; transform: scale(1.04); }
+.cand-status.s-proc { cursor: default; }
+.cand-status.s-proc:hover { opacity: 1; transform: none; }
+
+/* ── Status Popup ── */
+.status-popup {
+  position: fixed; z-index: 9999;
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 6px; min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: popupIn 0.12s cubic-bezier(.4,0,.2,1);
+}
+@keyframes popupIn {
+  from { opacity: 0; transform: scale(0.92) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.status-popup-title {
+  font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); padding: 6px 10px 8px; border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.status-popup-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 12px; font-weight: 500; transition: background 0.12s;
+}
+.status-popup-item:hover { background: rgba(255,255,255,0.06); }
+.status-popup-item.sp-ok    { color: var(--green); }
+.status-popup-item.sp-warn  { color: var(--yellow); }
+.status-popup-item.sp-run   { color: var(--accent2); }
+.status-popup-item.sp-err   { color: var(--red); }
+.status-popup-sep { height: 1px; background: var(--border); margin: 4px 0; }
+.cand-run { margin-left: 8px; background: transparent; border: 1px solid var(--border2); color: var(--muted2); border-radius: 6px; padding: 3px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.cand-run:hover { border-color: var(--accent); color: var(--accent); }
+.cand-run:disabled { opacity: 0.35; cursor: not-allowed; }
+.cand-search-wrap { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.cand-search-input { flex: 1; background: var(--card); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
+.cand-search-input:focus { border-color: var(--accent); }
+.cand-filter-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted2); border-radius: 8px; padding: 8px 14px; font-size: 11px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.cand-filter-btn.active { border-color: var(--accent); color: var(--accent2); background: rgba(200,169,110,0.08); }
+.cand-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.s-wait { background: rgba(100,116,139,0.12); color: var(--muted2); }
+.s-proc { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.s-ok { background: rgba(62,207,142,0.1); color: var(--green); }
+.s-err { background: rgba(248,113,113,0.1); color: var(--red); }
+.s-skip { background: rgba(62,207,142,0.07); color: #2da46e; }
+.s-update { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.log-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px; height: 160px; overflow-y: auto; font-family: 'Inter', monospace; font-size: 12px; }
+.log-row { margin-bottom: 4px; line-height: 1.6; display: flex; gap: 10px; }
+.log-time { color: var(--muted); flex-shrink: 0; }
+.log-ok .log-msg { color: var(--green); }
+.log-err .log-msg { color: var(--red); }
+.log-warn .log-msg { color: var(--yellow); }
+.log-info .log-msg { color: var(--muted2); }
+.log-skip .log-msg { color: var(--blue); }
+.results-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 1200px; }
+thead tr { background: rgba(200,169,110,0.05); border-bottom: 1px solid var(--border2); }
+th { padding: 11px 14px; text-align: left; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); font-weight: 600; white-space: nowrap; }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted2); vertical-align: top; }
+td.primary { color: var(--text); font-weight: 500; }
+td.mono { font-family: 'Inter', monospace; font-size: 11px; letter-spacing: 0.5px; }
+tr:hover td { background: rgba(255,255,255,0.015); }
+tr:last-child td { border-bottom: none; }
+.chip { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+.chip-ok { background: rgba(62,207,142,0.1); color: var(--green); }
+.chip-warn { background: rgba(251,191,36,0.1); color: var(--yellow); }
+.chip-update { background: rgba(129,140,248,0.1); color: var(--blue); }
+.num { font-size: 11px; color: var(--muted); }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+.info-box { background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: var(--muted2); line-height: 1.7; }
+.info-box strong { color: var(--accent2); }
+
+/* Step 4 - Candidate detail view */
+.cands-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 8px; }
+.cand-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.cand-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+.cand-card-header { padding: 18px 20px 14px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); }
+.cand-avatar-big {
+  width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #1e2330, #2d3348);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--accent2);
+  border: 2px solid var(--border2);
+}
+.cand-card-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.cand-card-phone { font-size: 12px; color: var(--muted); font-family: monospace; }
+.cand-progress-wrap { padding: 14px 20px 10px; }
+.cand-progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.cand-progress-label span:first-child { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.cand-progress-label span:last-child { font-size: 12px; font-weight: 600; }
+.cand-bar { height: 5px; background: var(--border2); border-radius: 4px; overflow: hidden; }
+.cand-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.docs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 20px 18px; }
+.doc-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 10px; border-radius: 8px; font-size: 11px;
+  border: 1px solid var(--border);
+}
+.doc-pill.ok { background: rgba(62,207,142,0.06); border-color: rgba(62,207,142,0.2); color: var(--green); }
+.doc-pill.miss { background: rgba(248,113,113,0.04); border-color: rgba(248,113,113,0.15); color: var(--red); }
+.doc-pill.partial { background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.2); color: var(--yellow); }
+.doc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.doc-dot.ok { background: var(--green); }
+.doc-dot.miss { background: var(--red); }
+.doc-dot.partial { background: var(--yellow); }
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: 18px; width: 100%; max-width: 780px;
+  max-height: 90vh; overflow-y: auto; position: relative;
+}
+.modal-header {
+  padding: 28px 32px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 18px; position: sticky; top: 0;
+  background: var(--panel); z-index: 10;
+}
+.modal-avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: #0a0c12;
+}
+.modal-name { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--accent2); margin-bottom: 4px; }
+.modal-phone { font-size: 13px; color: var(--muted2); font-family: monospace; }
+.modal-close { margin-left: auto; background: var(--card); border: 1px solid var(--border2); color: var(--muted2); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s; }
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+.modal-body { padding: 24px 32px 32px; }
+.modal-section { margin-bottom: 28px; }
+.modal-section-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.docs-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.doc-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.doc-item.ok { background: rgba(62,207,142,0.05); border-color: rgba(62,207,142,0.2); }
+.doc-item.miss { background: rgba(248,113,113,0.04); border-color: rgba(248,113,113,0.15); }
+.doc-item.partial { background: rgba(251,191,36,0.05); border-color: rgba(251,191,36,0.2); }
+.doc-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.doc-icon.ok { background: rgba(62,207,142,0.12); }
+.doc-icon.miss { background: rgba(248,113,113,0.1); }
+.doc-icon.partial { background: rgba(251,191,36,0.1); }
+.doc-label { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.doc-status { font-size: 11px; }
+.doc-status.ok { color: var(--green); }
+.doc-status.miss { color: var(--red); }
+.doc-status.partial { color: var(--yellow); }
+.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.data-field { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; position: relative; }
+.data-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; }
+.data-value { font-size: 13px; color: var(--text); font-weight: 500; word-break: break-word; }
+.data-value.empty { color: var(--muted); font-style: italic; font-weight: 400; font-size: 12px; }
+.data-field-btns { display: flex; gap: 4px; margin-top: 8px; opacity: 0; transition: opacity 0.15s; flex-wrap: wrap; }
+.data-field:hover .data-field-btns { opacity: 1; }
+.edit-btn {
+  background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25);
+  color: var(--accent); font-size: 10px; padding: 3px 9px; border-radius: 4px;
+  cursor: pointer; transition: background 0.15s;
+  font-family: 'Inter', sans-serif; font-weight: 500; white-space: nowrap;
+}
+.edit-btn:hover { background: rgba(200,169,110,0.2); }
+.edit-input-wrap { display: none; margin-top: 6px; gap: 6px; }
+.edit-input-wrap.open { display: flex; }
+.edit-input {
+  flex: 1; background: var(--bg); border: 1px solid var(--accent);
+  border-radius: 6px; padding: 6px 10px; color: var(--text);
+  font-family: 'Inter', monospace; font-size: 12px; outline: none;
+}
+.save-btn {
+  background: var(--accent); color: #0a0c12; border: none;
+  border-radius: 6px; padding: 6px 12px; font-size: 11px;
+  font-weight: 600; cursor: pointer; white-space: nowrap;
+  font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+}
+.save-btn:hover { opacity: 0.85; }
+.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.doc-item { position: relative; }
+.doc-edit-btn {
+  background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25);
+  color: var(--accent); font-size: 10px; padding: 3px 8px; border-radius: 4px;
+  cursor: pointer; opacity: 0; transition: opacity 0.15s;
+  font-family: 'Inter', sans-serif; font-weight: 500; white-space: nowrap;
+}
+.doc-item:hover .doc-edit-btn { opacity: 1; }
+.doc-edit-wrap { display: none; margin-top: 8px; gap: 6px; padding: 0 0 2px; }
+.doc-edit-wrap.open { display: flex; }
+.doc-ai-upload-wrap { display: none; }
+
+/* Document viewer */
+.doc-viewer-overlay {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.92); backdrop-filter: blur(6px);
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.doc-viewer-overlay.open { display: flex; }
+.doc-viewer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; max-width: 900px; padding: 16px 20px;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+}
+.doc-viewer-title { font-size: 14px; color: var(--text); font-weight: 500; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-viewer-actions { display: flex; gap: 8px; align-items: center; }
+.doc-viewer-close {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--card);
+  border: 1px solid var(--border2); color: var(--muted2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  transition: all 0.15s;
+}
+.doc-viewer-close:hover { border-color: var(--red); color: var(--red); }
+.doc-viewer-body {
+  width: 100%; max-width: 900px; flex: 1;
+  background: #1a1a1a; overflow: auto; max-height: 78vh;
+  border-radius: 0 0 12px 12px; display: flex; align-items: center; justify-content: center;
+}
+.doc-viewer-body img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.doc-viewer-body iframe { width: 100%; height: 78vh; border: none; }
+.doc-viewer-body .doc-load { color: var(--muted2); font-size: 14px; padding: 40px; text-align: center; }
+.doc-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 6px; font-size: 12px;
+  font-family: 'Inter', sans-serif; font-weight: 500; cursor: pointer;
+  border: none; transition: all 0.15s;
+}
+.doc-btn-view { background: rgba(200,169,110,0.12); color: var(--accent); border: 1px solid rgba(200,169,110,0.25); }
+.doc-btn-view:hover { background: rgba(200,169,110,0.2); }
+.doc-btn-dl { background: var(--accent); color: #0a0c12; }
+.doc-btn-dl:hover { opacity: 0.85; }
+
+/* Files list in modal */
+.files-section { margin-bottom: 24px; }
+.files-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.file-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; transition: border-color 0.15s;
+}
+.file-item:hover { border-color: var(--accent); }
+.file-icon { font-size: 20px; flex-shrink: 0; }
+.file-name { flex: 1; font-size: 11px; color: var(--muted2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-actions { display: flex; gap: 4px; }
+.file-btn {
+  padding: 4px 8px; border-radius: 5px; font-size: 10px; font-weight: 500;
+  cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.file-btn-view { background: rgba(200,169,110,0.1); color: var(--accent); border: 1px solid rgba(200,169,110,0.2); }
+.file-btn-view:hover { background: rgba(200,169,110,0.2); }
+.file-btn-dl { background: rgba(62,207,142,0.1); color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
+.file-btn-dl:hover { background: rgba(62,207,142,0.2); }
+@media (max-width: 768px) {
+  .files-grid { grid-template-columns: 1fr !important; }
+  .doc-viewer-body { max-height: 70vh; }
+}
+.data-value.mono { font-family: monospace; letter-spacing: 0.5px; }
+.completion-ring { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+.ring-wrap { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--accent2); }
+.ring-info h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.ring-info p { font-size: 12px; color: var(--muted2); }
+.btn-whatsapp {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px; border: none;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white; font-family: "Inter", sans-serif; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-whatsapp:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(37,211,102,0.35); }
+.btn-whatsapp svg { width: 18px; height: 18px; fill: white; flex-shrink: 0; }
+.missing-docs-list { background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.15); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+.missing-docs-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--red); margin-bottom: 10px; font-weight: 600; }
+.missing-doc-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted2); margin-bottom: 6px; }
+.missing-doc-item:last-child { margin-bottom: 0; }
+.missing-doc-item::before { content: "📌"; font-size: 12px; }
+
+.search-bar { display: flex; gap: 12px; margin-bottom: 24px; }
+.search-input { flex: 1; background: var(--card); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 16px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--accent); }
+.filter-btn { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border2); background: var(--card); color: var(--muted2); font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,0.08); }
+
+/* ── Smart AI Upload Zone ── */
+.smart-upload-zone {
+  border: 2px dashed rgba(129,140,248,0.4);
+  border-radius: 14px;
+  background: rgba(129,140,248,0.04);
+  padding: 18px 20px;
+  margin-bottom: 0;
+  transition: all 0.2s;
+}
+.smart-upload-zone.dragover {
+  border-color: var(--blue);
+  background: rgba(129,140,248,0.1);
+}
+.smart-upload-dropzone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; cursor: pointer; padding: 12px 0; text-align: center;
+  transition: all 0.2s;
+}
+.smart-upload-dropzone:hover { opacity: 0.82; }
+.smart-upload-dropzone .su-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; }
+.smart-upload-dropzone .su-title { font-size: 13px; font-weight: 600; color: var(--blue); }
+.smart-upload-dropzone .su-sub { font-size: 11px; color: var(--muted); }
+.smart-upload-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-top: 10px; padding: 9px 20px; border-radius: 8px;
+  background: rgba(129,140,248,0.15); border: 1px solid rgba(129,140,248,0.4);
+  color: var(--blue); font-family: 'Inter', sans-serif; font-size: 12px;
+  font-weight: 600; cursor: pointer; transition: all 0.18s;
+}
+.smart-upload-btn:hover { background: rgba(129,140,248,0.25); }
+.smart-upload-progress {
+  margin-top: 14px; display: none;
+}
+.su-step {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 8px; margin-bottom: 6px;
+  font-size: 12px; background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+}
+.su-step-icon { font-size: 16px; flex-shrink: 0; }
+.su-step-text { flex: 1; color: var(--muted2); }
+.su-step.active .su-step-text { color: var(--yellow); }
+.su-step.done .su-step-text { color: var(--green); }
+.su-step.error .su-step-text { color: var(--red); }
+.su-filled-fields {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;
+}
+.su-field-tag {
+  padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 600;
+  background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.25); color: var(--green);
+}
+</style>
+<style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:"Roboto-Regular",arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height linear .2s;transition:height linear .2s}.P1ekSe-ZMv3u>div:nth-child(1){background-color:#1a73e8!important;-webkit-transition:width linear .3s;transition:width linear .3s}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(to right,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(to right,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(to right,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(to right,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:"Google Sans",arial,sans-serif;font-size:14px;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:14px;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:11px;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:"Google Sans",arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:hover,.nsm7Bb-HzV7m-LgbsSe:focus{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:"Roboto";font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style></head>
+<body>
+<!-- Mobile header: shown only on mobile via CSS -->
+<header class="mobile-header" id="mobileHeader">
+  <div>
+    <div class="mobile-header-logo">Gestão de Candidatos</div>
+    <div class="mobile-header-sub">ACMS Recrutamentos</div>
+  </div>
+  <div class="mobile-header-dots">
+    <div class="mobile-dot-item"><span class="status-dot" id="dotDriveMobile"></span>Drive</div>
+    <div class="mobile-dot-item"><span class="status-dot" id="dotSheetsMobile"></span>Sheets</div>
+  </div>
+</header>
+
+<!-- Mobile bottom nav: shown only on mobile via CSS -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-item active" id="mnav1" onclick="goStep(1)">
+    <span class="mn-icon">⚙️</span><span>Início</span>
+  </div>
+  <div class="mobile-nav-item" id="mnav2" onclick="goStep(2)">
+    <span class="mn-icon">🔄</span><span>Extração</span>
+    <span class="mn-badge" id="mnavBadge" style="display:none">0</span>
+  </div>
+  <div class="mobile-nav-item" id="mnav3" onclick="goStep(3)">
+    <span class="mn-icon">📊</span><span>Resultados</span>
+  </div>
+  <div class="mobile-nav-item" id="mnav4" onclick="goStep(4)" style="display:none">
+    <span class="mn-icon">👥</span><span>Candidatos</span>
+  </div>
+</nav>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Recolher menu">‹</button>
+    <div class="logo">
+      <div class="logo-icon">👥</div>
+      <div class="logo-title">Gestão de<br>Candidatos</div>
+      <div class="logo-sub">ACMS Recrutamentos</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Processo</div>
+      <div class="nav-item active" onclick="goStep(1)" id="nav1"><span>⚙</span> Configuração</div>
+      <div class="nav-item" onclick="goStep(2)" id="nav2"><span>⟳</span> Extração <span class="nav-badge" id="navBadge" style="display:none">0</span></div>
+      <div class="nav-item" onclick="goStep(3)" id="nav3"><span>◫</span> Resultados</div>
+      <div class="nav-item" onclick="goStep(4)" id="nav4" style="display:none"><span>👤</span> Candidatos</div>
+    </div>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;margin-bottom:6px">
+        <span class="status-dot" id="dotDrive"></span>
+        <span style="font-size:12px;color:var(--muted2)">Google Drive</span>
+      </div>
+      <div style="display:flex;align-items:center;margin-bottom:6px">
+        <span class="status-dot" id="dotSheets"></span>
+        <span style="font-size:12px;color:var(--muted2)">Google Sheets</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px" id="folderStatus"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <div class="page-header">
+        <h2>Bem-vindo</h2>
+        <p>Clique no botão abaixo para conectar e acessar o sistema</p>
+      </div>
+      <div class="divider"></div>
+      <div class="info-box">
+        <strong>ACMS Recrutamentos</strong> — Sistema de Gestão de Candidatos.<br>
+        Ao conectar, os dados dos candidatos serão carregados automaticamente.
+      </div>
+      <input type="hidden" id="clientId" value="470862067157-788a45dri1ug32cpbpukkn9pcrg2m0t7.apps.googleusercontent.com">
+      <input type="hidden" id="folderId" value="1y3FQXzJZdepQBczny4WTPR_Bd5X_TnRH">
+      <input type="hidden" id="sheetId" value="1fqequZU-GWQDJElDZ4aRL56NMp5xWDGb4IPzQtEkock">
+      <input type="hidden" id="sheetGid" value="0">
+      <input type="hidden" id="claudeKey" value="">
+      <div class="btn-row">
+        <button class="btn btn-gold" id="btnConnect" onclick="startAuth()">Conectar ao Google →</button>
+      </div>
+      <div id="googleLoadHint" style="margin-top: 12px; font-size: 12px; color: var(--muted2); display: none;">🔄 Carregando biblioteca do Google...</div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <div class="page-header">
+        <h2>Extração de Dados</h2>
+        <p>Verificando planilha e detectando documentos novos</p>
+      </div>
+      <div class="divider"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-num" id="statNew">0</div><div class="stat-label">Novos</div></div>
+        <div class="stat-card"><div class="stat-num" id="statUpdate">0</div><div class="stat-label">Atualizados</div></div>
+        <div class="stat-card"><div class="stat-num" id="statSkip">0</div><div class="stat-label">Sem alteração</div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label" id="progressLabel">Aguardando início...</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="cand-search-wrap">
+        <input class="cand-search-input" id="candSearch" type="text" placeholder="🔍  Buscar por nome ou telefone..." oninput="filterCandList()">
+        <button class="cand-filter-btn active" id="cf-all" onclick="setCandFilter(&#39;all&#39;)">Todos</button>
+        <button class="cand-filter-btn" id="cf-incomplete" onclick="setCandFilter(&#39;incomplete&#39;)">⚠ Incompletos</button>
+        <button class="cand-filter-btn" id="cf-ok" onclick="setCandFilter(&#39;ok&#39;)">✓ Sem alteração</button>
+      </div>
+      <div class="cand-list" id="candList"></div>
+      <div class="log-panel" id="logBox"></div>
+      <div class="btn-row" style="margin-top:20px">
+        <button class="btn btn-gold" id="btnProcess" onclick="startProcessing()">Iniciar Extração</button>
+        <button class="btn btn-outline" onclick="goStep(3)" id="btnGoResults" style="display:none">📊 Ver Resultado</button>
+        <button class="btn btn-blue" onclick="goStep(4)" id="btnGoCandidates" style="display:none">👥 Ver Candidatos</button>
+        <button class="btn btn-ghost" onclick="resetAll()">Reiniciar</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" id="step4">
+      <div class="page-header">
+        <h2>Candidatos</h2>
+        <p>Visualização detalhada dos documentos e dados de cada candidato</p>
+      </div>
+      <div class="divider"></div>
+      <div class="search-bar" style="flex-wrap:wrap;gap:8px">
+        <input class="search-input" id="searchInput" type="text" placeholder="Buscar por nome ou telefone..." oninput="filterCards()">
+        <button class="filter-btn active" id="fAll" onclick="setFilter(&#39;all&#39;)">Todos</button>
+        <button class="filter-btn" id="fNew" onclick="setFilter(&#39;new&#39;)" style="border-color:rgba(129,140,248,0.4);color:var(--blue)">🆕 Novos</button>
+        <button class="filter-btn" id="fComplete" onclick="setFilter(&#39;complete&#39;)">✓ Completos</button>
+        <button class="filter-btn" id="fIncomplete" onclick="setFilter(&#39;incomplete&#39;)">⚠ Incompletos</button>
+        <button class="btn btn-gold" id="btnProcessNew" onclick="processOnlyNew()" style="display:none;padding:8px 16px;font-size:12px">⚡ Atualizar Novos</button>
+      </div>
+      <div class="cands-grid" id="candsGrid"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <div class="results-header">
+        <div class="page-header" style="margin-bottom:0">
+          <h2>Resultado</h2>
+          <p id="resultSummary">—</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="downloadCSV()">⬇ Exportar CSV</button>
+          <button class="btn btn-outline" onclick="downloadIncompleteReport()">⬇ Relatório Incompletos</button>
+          <button class="btn btn-ghost" onclick="resetAll()">↩ Novo processo</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="r-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-num" id="r-complete">0</div><div class="stat-label">✓ Completos</div></div>
+        <div class="stat-card"><div class="stat-num" id="r-incomplete">0</div><div class="stat-label">⚠ Incompletos</div></div>
+        <div class="stat-card"><div class="stat-num" id="r-updated">0</div><div class="stat-label">🔄 Atualizados</div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <input id="tableSearch" type="text" placeholder="🔍 Buscar na tabela..." oninput="filterTable()" style="flex:1;min-width:180px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text);font-family:&#39;Inter&#39;,sans-serif;font-size:13px;outline:none">
+        <button class="filter-btn active" id="tf-all" onclick="setTableFilter(&#39;all&#39;)">Todos</button>
+        <button class="filter-btn" id="tf-complete" onclick="setTableFilter(&#39;complete&#39;)">✓ Completos</button>
+        <button class="filter-btn" id="tf-incomplete" onclick="setTableFilter(&#39;incomplete&#39;)">⚠ Incompletos</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Nome</th><th>CPF</th><th>RG</th><th>Dt.Nasc</th>
+              <th>Pai</th><th>Mãe</th><th>Telefone</th>
+              <th>Cidade</th><th>UF</th><th>PIS</th><th>CTPS</th><th>Título</th><th>Status</th>
+            </tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <!-- Document Viewer -->
+<div class="doc-viewer-overlay" id="docViewerOverlay">
+  <div class="doc-viewer-header">
+    <span class="doc-viewer-title" id="docViewerTitle">Documento</span>
+    <div class="doc-viewer-actions">
+      <button class="doc-btn doc-btn-dl" id="docViewerDl" onclick="downloadCurrentDoc()">⬇ Baixar</button>
+      <button class="doc-viewer-close" onclick="closeDocViewer()">×</button>
+    </div>
+  </div>
+  <div class="doc-viewer-body" id="docViewerBody">
+    <div class="doc-load">Carregando...</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-avatar" id="modalAvatar"></div>
+        <div>
+          <div class="modal-name" id="modalName"></div>
+          <div class="modal-phone" id="modalPhone"></div>
+        </div>
+        <button class="modal-close" onclick="closeModalDirect()">×</button>
+      </div>
+      <div id="modalMissingDocs" style="padding:16px 32px 0;display:none">
+        <div class="missing-docs-list">
+          <div class="missing-docs-title">⚠ Documentos Pendentes</div>
+          <div id="modalMissingList"></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <a id="btnWhatsApp" href="file:///C:/Users/Usuario/Downloads/index_18.html#" target="_blank" class="btn-whatsapp">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+            Solicitar Documentos via WhatsApp
+          </a>
+        </div>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Google GSI loading callbacks — must be defined BEFORE the async script tag ──
+let _googleReady = false;
+let _googleError = false;
+
+function onGoogleLoaded() {
+  _googleReady = true;
+  const btn = document.getElementById('btnConnect');
+  if (btn) { btn.disabled = false; btn.textContent = 'Conectar ao Google →'; }
+  const hint = document.getElementById('googleLoadHint');
+  if (hint) hint.style.display = 'none';
+}
+
+function onGoogleError() {
+  _googleError = true;
+  const btn = document.getElementById('btnConnect');
+  if (btn) { btn.disabled = false; btn.textContent = 'Conectar ao Google →'; }
+  const hint = document.getElementById('googleLoadHint');
+  if (hint) {
+    hint.textContent = '❌ Erro ao carregar biblioteca do Google. Verifique sua conexão e recarregue a página.';
+    hint.style.color = 'var(--red)';
+    hint.style.display = '';
+  }
+}
+</script>
+
+<script src="./index_files/client" async="" defer="" onload="onGoogleLoaded()" onerror="onGoogleError()"></script>
+<script>
+// ── Globals ──
+let accessToken = null, extractedData = [], claudeApiKey = '';
+let rootFolderId = '', sheetId = '', sheetGid = '';
+let totalFolders = 0, newCount = 0, updateCount = 0, skipCount = 0;
+let candidateFolders = [], sheetRows = {};
+
+// Column definitions — order matters for Sheets
+const COLUMNS = [
+  'TELEFONE','NOME','CURRICULO','FOTO_SELFIE',
+  'NUMERO_CTPS','SERIE_CTPS','UF_CTPS','NUMERO_PIS','NUMERO_RESERVISTA',
+  'RG_NUMERO','RG_ORGAO_EMISSOR','RG_UF','RG_DATA_EXPEDICAO','RG_FRENTE','RG_VERSO',
+  'NUMERO_CPF','ATESTADO_ANTECEDENTES',
+  'NOME_PAI','NOME_MAE',
+  'NUMERO_TITULO_ELEITOR','ZONA_ELEITOR','SECAO_ELEITOR',
+  'ENDERECO','NUMERO_ENDERECO','COMPLEMENTO','BAIRRO','CIDADE','ESTADO','CEP',
+  'DATA_NASCIMENTO',
+  'DADOS_BANCARIOS','METODO_PIX','CHAVE_PIX',
+  'NOME_EMPRESA_ATUAL','CARGO_ATUAL',
+  'DATA_HORA_CADASTRO','ULTIMA_EXTRACAO','STATUS_EXTRACAO','PASTA_DRIVE','FOLDER_ID'
+];
+
+const HEADER_ROW = COLUMNS;
+
+// Fields that are numeric-looking (force text in CSV)
+const NUMERIC_FIELDS = ['TELEFONE','NUMERO_CTPS','SERIE_CTPS','NUMERO_PIS','NUMERO_RESERVISTA',
+  'RG_NUMERO','NUMERO_CPF','NUMERO_TITULO_ELEITOR','ZONA_ELEITOR','SECAO_ELEITOR',
+  'NUMERO_ENDERECO','CEP','CHAVE_PIX'];
+
+// Required fields to consider "complete" — ALL mandatory docs
+const REQUIRED = [
+  'NOME','NUMERO_CPF','RG_FRENTE','RG_VERSO','RG_NUMERO',
+  'NOME_PAI','NOME_MAE','DATA_NASCIMENTO',
+  'NUMERO_TITULO_ELEITOR',
+  'NUMERO_CTPS','NUMERO_PIS',
+  'ENDERECO','CIDADE','ESTADO','CEP'
+];
+
+// Fields that count toward % progress (broader than REQUIRED)
+const COMPLETION_FIELDS = [
+  'NOME','NUMERO_CPF','RG_FRENTE','RG_VERSO','RG_NUMERO',
+  'NOME_PAI','NOME_MAE','DATA_NASCIMENTO',
+  'NUMERO_TITULO_ELEITOR','NUMERO_CTPS','NUMERO_PIS',
+  'ENDERECO','CIDADE','ESTADO','CEP',
+  'CURRICULO','FOTO_SELFIE','DADOS_BANCARIOS','TELEFONE'
+];
+
+// ── UI helpers ──
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+  // Desktop nav
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('nav'+i);
+    if (el) el.classList.toggle('active', i === n);
+  }
+  // Mobile nav (only if exists)
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('mnav'+i);
+    if (el) el.classList.toggle('active', i === n);
+  }
+  window.scrollTo(0,0);
+}
+
+function log(msg, type='info') {
+  const box = document.getElementById('logBox');
+  const row = document.createElement('div');
+  row.className = 'log-row log-' + type;
+  row.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString('pt-BR')}</span><span class="log-msg">${msg}</span>`;
+  box.appendChild(row);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setFS(id, cls, txt) {
+  const el = document.getElementById('fs-'+id);
+  if (el) { el.className = 'cand-status ' + cls; el.textContent = txt; }
+  filterCandList();
+}
+
+function setDot(id, on) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'status-dot' + (on ? ' on' : '');
+  // Sync mobile dots (may not exist on desktop)
+  const mel = document.getElementById(id + 'Mobile');
+  if (mel) mel.className = 'status-dot' + (on ? ' on' : '');
+}
+
+// ── Parse Brazilian date format DD/MM/AAAA, HH:MM:SS → Date ──
+function parseBRDate(str) {
+  if (!str) return null;
+  // Format: "20/03/2026, 10:13:58"
+  const m = str.match(/(\d{2})\/(\d{2})\/(\d{4}),?\s*(\d{2}):(\d{2}):(\d{2})/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], +m[6]);
+  // Fallback
+  return new Date(str);
+}
+
+// ── Auth ──
+function waitForGoogle(timeout = 15000) {
+  return new Promise((resolve, reject) => {
+    if (typeof google !== 'undefined' && google.accounts) { resolve(); return; }
+    const start = Date.now();
+    const check = setInterval(() => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        clearInterval(check); resolve();
+      } else if (Date.now() - start > timeout) {
+        clearInterval(check);
+        reject(new Error('Timeout: biblioteca do Google não carregou. Verifique sua conexão com a internet.'));
+      }
+    }, 150);
+  });
+}
+
+async function startAuth() {
+  const clientId = document.getElementById('clientId').value.trim();
+  rootFolderId = document.getElementById('folderId').value.trim();
+  sheetId = document.getElementById('sheetId').value.trim();
+  sheetGid = document.getElementById('sheetGid').value.trim();
+  if (!clientId || !rootFolderId || !sheetId) { alert('Preencha todos os campos!'); return; }
+
+  const btn = document.getElementById('btnConnect');
+  const hint = document.getElementById('googleLoadHint');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Aguardando Google...'; }
+  if (hint) { hint.textContent = '🔄 Carregando biblioteca do Google...'; hint.style.color = 'var(--muted2)'; hint.style.display = ''; }
+
+  try {
+    await waitForGoogle(15000);
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Conectar ao Google →'; }
+    if (hint) { hint.textContent = '❌ ' + e.message; hint.style.color = 'var(--red)'; }
+    return;
+  }
+
+  if (hint) hint.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = '🔐 Autenticando...'; }
+
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets',
+    callback: async (resp) => {
+      if (resp.error) {
+        alert('Erro OAuth: ' + resp.error);
+        if (btn) { btn.disabled = false; btn.textContent = 'Conectar ao Google →'; }
+        return;
+      }
+      accessToken = resp.access_token;
+      setDot('dotDrive', true);
+      setDot('dotSheets', true);
+      if (btn) { btn.disabled = false; btn.textContent = 'Conectar ao Google →'; }
+      goStep(2);
+      await loadSheetData();
+      await loadFolders();
+    }
+  });
+  client.requestAccessToken({ prompt: 'consent' });
+}
+
+// ── Google Drive helpers ──
+async function driveList(params) {
+  const url = new URL('https://www.googleapis.com/drive/v3/files');
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (!r.ok) throw new Error('Drive API ' + r.status);
+  return r.json();
+}
+
+async function driveExport(id, mime) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${id}/export?mimeType=${encodeURIComponent(mime)}`, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (!r.ok) throw new Error('Export ' + r.status);
+  return r.text();
+}
+
+async function driveDownload(id) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (!r.ok) throw new Error('Download ' + r.status);
+  return r.text();
+}
+
+async function driveDownloadBase64(id) {
+  const r = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (!r.ok) throw new Error('Download ' + r.status);
+  const blob = await r.blob();
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Upload a File object to a Drive folder, returns the created file metadata
+async function driveUploadFile(file, parentFolderId, customName) {
+  const fileName = customName || file.name;
+  const metadata = { name: fileName, parents: [parentFolderId] };
+
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+
+  const r = await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,webViewLink',
+    { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form }
+  );
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error('Upload Drive ' + r.status + ': ' + errText.substring(0, 120));
+  }
+  return r.json();
+}
+
+// Get most recent file modification date in a folder
+async function getFolderLastModified(folderId) {
+  const res = await driveList({
+    q: `'${folderId}' in parents and trashed=false`,
+    fields: 'files(id,modifiedTime)',
+    orderBy: 'modifiedTime desc',
+    pageSize: 1
+  });
+  if (res.files && res.files.length > 0) return res.files[0].modifiedTime;
+  return null;
+}
+
+// ── Google Sheets helpers ──
+async function sheetsGet(range) {
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`,
+    { headers: { Authorization: 'Bearer ' + accessToken } }
+  );
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error('Sheets GET ' + r.status + ': ' + errText.substring(0, 120));
+  }
+  return r.json();
+}
+
+async function sheetsAppend(values) {
+  // Use explicit sheet range to avoid 400 errors
+  const range = encodeURIComponent('A1');
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+    {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values, majorDimension: 'ROWS' })
+    }
+  );
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error('Sheets Append ' + r.status + ': ' + errText.substring(0, 120));
+  }
+  return r.json();
+}
+
+async function sheetsUpdate(range, values) {
+  const r = await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values, majorDimension: 'ROWS' })
+    }
+  );
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '');
+    throw new Error('Sheets Update ' + r.status + ': ' + errText.substring(0, 120));
+  }
+  return r.json();
+}
+
+async function sheetsEnsureHeader() {
+  try {
+    const res = await sheetsGet('A1:AN1');
+    const existing = (res.values || [[]])[0];
+    if (!existing || existing.length === 0) {
+      await sheetsAppend([HEADER_ROW]);
+      log('Cabeçalho criado na planilha.', 'ok');
+    }
+  } catch(e) {
+    await sheetsAppend([HEADER_ROW]);
+  }
+}
+
+// ── Load existing sheet data ──
+async function loadSheetData() {
+  log('Lendo planilha Google Sheets...', 'info');
+  try {
+    await sheetsEnsureHeader();
+    const res = await sheetsGet('A1:AO1000');
+    const rows = res.values || [];
+    sheetRows = {};
+    extractedData = [];
+
+    if (rows.length > 1) {
+      const headers = rows[0];
+      const folderIdIdx = headers.indexOf('FOLDER_ID');
+      const ultimaIdx = headers.indexOf('ULTIMA_EXTRACAO');
+
+      // First pass: build sheetRows — if duplicate FOLDER_ID, keep last row (most recent)
+      const seenFids = {};
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const fid = row[folderIdIdx] || '';
+        if (!fid) continue;
+        // If duplicate, mark old row for deletion tracking
+        seenFids[fid] = i; // keeps last occurrence index
+      }
+
+      // Second pass: only add unique rows (last occurrence wins)
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const fid = row[folderIdIdx] || '';
+        if (!fid) continue;
+        if (seenFids[fid] !== i) continue; // skip older duplicates
+
+        const d = {};
+        COLUMNS.forEach((col, idx) => { d[col] = row[idx] || ''; });
+
+        sheetRows[fid] = {
+          rowIndex: i + 1,
+          ultimaExtracao: row[ultimaIdx] || '',
+          headers,
+          data: row
+        };
+
+        extractedData.push(d);
+      }
+
+      const n = Object.keys(sheetRows).length;
+      log(`${n} candidato(s) carregado(s) da planilha.`, 'ok');
+
+      if (n > 0) {
+        buildCandidateCards();
+        buildResultsTable();
+        ['nav3','nav4','mnav3','mnav4'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.style.display = '';
+        });
+        ['btnGoResults','btnGoCandidates'].forEach(id => {
+          const el = document.getElementById(id); if (el) el.style.display = '';
+        });
+        log(`✓ Relatório disponível — ${n} candidato(s) carregado(s).`, 'ok');
+      }
+    } else {
+      log('Planilha vazia — todos serão processados.', 'warn');
+    }
+  } catch(e) {
+    log('Erro ao ler planilha: ' + e.message, 'err');
+  }
+}
+
+// ── Load Drive folders ──
+async function loadFolders() {
+  log('Listando pastas no Google Drive...', 'info');
+  try {
+    let all = [], token = null;
+    do {
+      const p = {
+        q: `'${rootFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'nextPageToken,files(id,name,modifiedTime)',
+        pageSize: 100
+      };
+      if (token) p.pageToken = token;
+      const res = await driveList(p);
+      all = all.concat(res.files || []);
+      token = res.nextPageToken;
+    } while(token);
+
+    candidateFolders = all;
+    totalFolders = all.length;
+    document.getElementById('statTotal').textContent = totalFolders;
+    document.getElementById('navBadge').textContent = totalFolders;
+    document.getElementById('navBadge').style.display = '';
+    const mb = document.getElementById('mnavBadge');
+    if (mb) { mb.textContent = totalFolders; mb.style.display = ''; }
+    document.getElementById('folderStatus').textContent = totalFolders + ' candidatos';
+    log(totalFolders + ' pastas encontradas no Drive.', 'ok');
+
+    // Classify each folder
+    let nNew = 0, nUpd = 0, nSkip = 0;
+    const list = document.getElementById('candList');
+    list.innerHTML = '';
+
+    for (let i = 0; i < all.length; i++) {
+      const f = all[i];
+      const parts = f.name.split(' - ');
+      const displayName = parts.length > 1 ? parts.slice(1).join(' - ') : f.name;
+      const initials = displayName.trim().split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+
+      const inSheet = sheetRows[f.id];
+      let cls, txt, dateStr = '';
+
+      if (!inSheet) {
+        cls = 's-wait'; txt = '🆕 Novo'; nNew++;
+      } else {
+        const lastExt = inSheet.ultimaExtracao ? parseBRDate(inSheet.ultimaExtracao) : null;
+        const folderMod = f.modifiedTime ? new Date(f.modifiedTime) : null;
+        // Check status in sheet
+        const sIdx = COLUMNS.indexOf('STATUS_EXTRACAO');
+        const rowStatus = inSheet.data && sIdx >= 0 ? (inSheet.data[sIdx] || '').trim() : '';
+        const isIncomplete = rowStatus !== 'Completo' || !lastExt;
+
+        if (isIncomplete) {
+          cls = 's-update'; txt = '⚠ Incompleto'; nUpd++;
+        } else if (lastExt && folderMod && folderMod > lastExt) {
+          cls = 's-update'; txt = '🔄 Atualizado'; nUpd++;
+        } else {
+          cls = 's-skip'; txt = '✓ Sem alteração'; nSkip++;
+        }
+        dateStr = inSheet.ultimaExtracao ? inSheet.ultimaExtracao.substring(0,10) : '';
+      }
+
+      const d = document.createElement('div');
+      d.className = 'cand-item';
+      d.innerHTML = `
+        <div class="cand-avatar">${initials || (i+1)}</div>
+        <div class="cand-name">${f.name}</div>
+        ${dateStr ? `<span class="cand-date">${dateStr}</span>` : ''}
+        <span class="cand-status ${cls}" id="fs-${f.id}" onclick="openStatusPopup(event,'${f.id}')" title="Clique para gerenciar status">${txt}</span>`;
+      list.appendChild(d);
+    }
+
+    document.getElementById('statNew').textContent = nNew;
+    document.getElementById('statUpdate').textContent = nUpd;
+    document.getElementById('statSkip').textContent = nSkip;
+    log(`Novos: ${nNew} | Atualizados: ${nUpd} | Sem alteração: ${nSkip}`, 'ok');
+  } catch(e) { log('Erro ao listar pastas: ' + e.message, 'err'); }
+}
+
+// ── Single global scan: find all folders that have new files since their last extraction ──
+async function scanFoldersWithNewFiles(completeFolders) {
+  // completeFolders: array of {id, lastExt} — only the ones with complete data
+  // Strategy: query Drive for files modified after the OLDEST lastExt among complete folders,
+  // then filter by parent folderId. This is 1 API call instead of N.
+  const updatedFolderIds = new Set();
+  if (!completeFolders.length) return updatedFolderIds;
+
+  // Find oldest extraction date to use as the query threshold
+  const oldest = completeFolders.reduce((min, f) => f.lastExt < min ? f.lastExt : min, completeFolders[0].lastExt);
+  const iso = oldest.toISOString();
+  const parentIds = new Set(completeFolders.map(f => f.id));
+
+  log('Verificando arquivos novos no Drive...', 'info');
+  try {
+    let token = null;
+    do {
+      const p = {
+        // Check both modifiedTime and createdTime — files copied/uploaded keep original modifiedTime
+        // but always get a new createdTime in the destination folder
+        q: `trashed=false and (modifiedTime > '${iso}' or createdTime > '${iso}')`,
+        fields: 'nextPageToken,files(id,parents,modifiedTime,createdTime)',
+        pageSize: 1000
+      };
+      if (token) p.pageToken = token;
+      const res = await driveList(p);
+      for (const file of (res.files || [])) {
+        for (const pid of (file.parents || [])) {
+          if (parentIds.has(pid)) {
+            const folderInfo = completeFolders.find(f => f.id === pid);
+            if (folderInfo) {
+              const fileMod = new Date(file.modifiedTime);
+              const fileCreated = new Date(file.createdTime);
+              // Detect if file is new in this folder via either timestamp
+              if (fileMod > folderInfo.lastExt || fileCreated > folderInfo.lastExt) {
+                updatedFolderIds.add(pid);
+              }
+            }
+          }
+        }
+      }
+      token = res.nextPageToken;
+    } while(token);
+  } catch(e) {
+    log('Aviso: erro na varredura global. ' + e.message, 'warn');
+    completeFolders.forEach(f => updatedFolderIds.add(f.id));
+  }
+  log(`${updatedFolderIds.size} pasta(s) com arquivos novos detectada(s).`, 'ok');
+  return updatedFolderIds;
+}
+
+// ── Filter/search the candidate list ──
+let candFilterMode = 'all';
+
+function setCandFilter(mode) {
+  candFilterMode = mode;
+  ['all','incomplete','ok'].forEach(m => {
+    const btn = document.getElementById('cf-' + m);
+    if (btn) btn.classList.toggle('active', m === mode);
+  });
+  filterCandList();
+}
+
+// ── Debounce helper ──
+function debounce(fn, delay) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+const filterCandList = debounce(function _filterCandList() {
+  const q = (document.getElementById('candSearch')?.value || '').toLowerCase();
+  const items = document.querySelectorAll('#candList .cand-item');
+  items.forEach(item => {
+    const name = (item.querySelector('.cand-name')?.textContent || '').toLowerCase();
+    const statusEl = item.querySelector('.cand-status');
+    const statusTxt = (statusEl?.textContent || '').toLowerCase();
+    const matchSearch = !q || name.includes(q);
+    const matchFilter =
+      candFilterMode === 'all' ||
+      (candFilterMode === 'incomplete' && (statusTxt.includes('incompleto') || statusTxt.includes('novo') || statusTxt.includes('atualizado') || statusTxt.includes('erro'))) ||
+      (candFilterMode === 'ok' && statusTxt.includes('sem alteração'));
+    item.style.display = matchSearch && matchFilter ? '' : 'none';
+  });
+}, 120);
+
+// ── Status Popup ──
+let _popupEl = null;
+function closeStatusPopup() {
+  if (_popupEl) { _popupEl.remove(); _popupEl = null; }
+  document.removeEventListener('click', _popupOutside, true);
+}
+function _popupOutside(e) { if (_popupEl && !_popupEl.contains(e.target)) closeStatusPopup(); }
+
+function openStatusPopup(event, folderId) {
+  event.stopPropagation();
+  if (_popupEl) { closeStatusPopup(); return; }
+
+  const statusEl = document.getElementById('fs-' + folderId);
+  if (!statusEl) return;
+
+  // Prevent popup while processing
+  if (statusEl.classList.contains('s-proc')) return;
+
+  const popup = document.createElement('div');
+  popup.className = 'status-popup';
+  popup.innerHTML = `
+    <div class="status-popup-title">⚙ Gerenciar Status</div>
+    <div class="status-popup-item sp-ok" onclick="manualSetStatus('${folderId}','Completo');closeStatusPopup()">
+      ✅ Marcar como <strong>Completo</strong>
+    </div>
+    <div class="status-popup-item sp-warn" onclick="manualSetStatus('${folderId}','Incompleto');closeStatusPopup()">
+      ⚠️ Marcar como <strong>Incompleto</strong>
+    </div>
+    <div class="status-popup-item sp-err" onclick="manualSetStatus('${folderId}','Pendente');closeStatusPopup()">
+      🕐 Marcar como <strong>Pendente</strong>
+    </div>
+    <div class="status-popup-sep"></div>
+    <div class="status-popup-item sp-run" onclick="closeStatusPopup();processSingle('${folderId}')">
+      🤖 Executar Extração IA
+    </div>`;
+
+  document.body.appendChild(popup);
+  _popupEl = popup;
+
+  // Position near the badge
+  const rect = statusEl.getBoundingClientRect();
+  const pw = 210, ph = 180;
+  let top = rect.bottom + 6;
+  let left = rect.left;
+  if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+  if (top + ph > window.innerHeight - 8) top = rect.top - ph - 6;
+  popup.style.top = top + 'px';
+  popup.style.left = left + 'px';
+
+  setTimeout(() => document.addEventListener('click', _popupOutside, true), 0);
+}
+
+// ── Manual Status Update ──
+async function manualSetStatus(folderId, newStatus) {
+  const statusEl = document.getElementById('fs-' + folderId);
+  if (!statusEl) return;
+
+  const statusMap = {
+    'Completo':   { cls: 's-ok',     txt: '✓ Completo' },
+    'Incompleto': { cls: 's-update', txt: '⚠ Incompleto' },
+    'Pendente':   { cls: 's-wait',   txt: '🕐 Pendente' },
+  };
+  const { cls, txt } = statusMap[newStatus] || { cls: 's-wait', txt: newStatus };
+
+  // Optimistic UI update
+  setFS(folderId, cls, txt);
+  log(`Status de "${folderId}" definido manualmente: ${newStatus}`, 'info');
+
+  // Update in-memory extractedData
+  const d = extractedData.find(e => e.FOLDER_ID === folderId);
+  if (d) {
+    d.STATUS_EXTRACAO = newStatus;
+    d.ULTIMA_EXTRACAO = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  }
+
+  // Persist to Google Sheets
+  const inSheet = sheetRows[folderId];
+  if (d && accessToken) {
+    try {
+      await saveToSheet(d, inSheet);
+      log(`✓ Status salvo na planilha: ${newStatus}`, 'ok');
+    } catch(e) {
+      log(`⚠ Erro ao salvar status: ${e.message}`, 'warn');
+    }
+  } else if (!accessToken) {
+    log('⚠ Sem conexão — status atualizado apenas localmente.', 'warn');
+  }
+
+  // Rebuild cards and table to reflect new status
+  buildCandidateCards();
+  buildResultsTable();
+}
+
+// ── Process a single folder by ID ──
+async function processSingle(folderId) {
+  const folder = candidateFolders.find(f => f.id === folderId);
+  if (!folder) return;
+
+  // Prevent double-click while processing
+  const statusEl = document.getElementById('fs-' + folderId);
+  if (statusEl && statusEl.classList.contains('s-proc')) return;
+
+  const inSheet = sheetRows[folderId];
+  setFS(folderId, 's-proc', '⏳ Processando...');
+  log(`▶ Executando: ${folder.name}`, 'info');
+
+  try {
+    const d = await processFolder(folder);
+    const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    d.ULTIMA_EXTRACAO = now;
+    d.PASTA_DRIVE = folder.name;
+    d.FOLDER_ID = folder.id;
+    if (!d.DATA_HORA_CADASTRO) d.DATA_HORA_CADASTRO = now;
+    d.STATUS_EXTRACAO = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '') ? 'Completo' : 'Incompleto';
+
+    const existIdx = extractedData.findIndex(e => e.FOLDER_ID === folderId);
+    if (existIdx >= 0) extractedData[existIdx] = d;
+    else extractedData.push(d);
+
+    await saveToSheet(d, inSheet);
+
+    const ok = d.STATUS_EXTRACAO === 'Completo';
+    setFS(folderId, ok ? 's-ok' : 's-update', ok ? '✓ Completo' : '⚠ Incompleto');
+    log('✓ ' + (d.NOME || folder.name), 'ok');
+    buildCandidateCards();
+    buildResultsTable();
+    ['btnGoResults','btnGoCandidates'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.display = '';
+    });
+  } catch(e) {
+    setFS(folderId, 's-err', '✗ Erro');
+    log('✗ ' + folder.name + ': ' + e.message, 'err');
+  }
+
+  // restore status after processing (handled by setFS inside try/catch)
+}
+
+// ── Main processing ──
+async function startProcessing() {
+  document.getElementById('btnProcess').disabled = true;
+  document.getElementById('btnProcess').textContent = 'Verificando...';
+  let processed = 0;
+  const statusIdx = COLUMNS.indexOf('STATUS_EXTRACAO');
+
+  // Step 1: split folders into incomplete (always process) vs complete (check Drive)
+  const toProcess = new Set();
+  const completeFolders = [];
+
+  for (const f of candidateFolders) {
+    const inSheet = sheetRows[f.id];
+    const sheetData = inSheet ? inSheet.data : null;
+    const sheetStatus = sheetData && statusIdx >= 0 ? (sheetData[statusIdx] || '').trim() : '';
+    const dataIncomplete = !inSheet || sheetStatus !== 'Completo' || REQUIRED.some(k => {
+      const idx = COLUMNS.indexOf(k);
+      return idx >= 0 && (!sheetData[idx] || sheetData[idx].trim() === '' || sheetData[idx] === 'null');
+    });
+    if (dataIncomplete) {
+      toProcess.add(f.id);
+    } else {
+      const lastExt = parseBRDate(inSheet.ultimaExtracao);
+      if (lastExt) completeFolders.push({ id: f.id, lastExt });
+      else toProcess.add(f.id); // no valid date → reprocess
+    }
+  }
+
+  // Step 2: one global Drive scan for all complete folders — finds new files in 1 call
+  const updatedByDrive = await scanFoldersWithNewFiles(completeFolders);
+  updatedByDrive.forEach(id => toProcess.add(id));
+
+  // Update visual list to reflect what will be processed
+  for (const f of candidateFolders) {
+    if (toProcess.has(f.id)) {
+      const inSheet = sheetRows[f.id];
+      const sheetData = inSheet ? inSheet.data : null;
+      const sheetStatus = sheetData && statusIdx >= 0 ? (sheetData[statusIdx] || '').trim() : '';
+      const motivo = !inSheet ? 's-wait' : sheetStatus !== 'Completo' ? 's-update' : 's-update';
+      setFS(f.id, motivo, !inSheet ? '🆕 Novo' : sheetStatus !== 'Completo' ? '⚠ Incompleto' : '🔄 Atualizado');
+    }
+  }
+
+  document.getElementById('btnProcess').textContent = 'Processando...';
+  document.getElementById('statNew').textContent = [...toProcess].filter(id => !sheetRows[id]).length;
+  document.getElementById('statUpdate').textContent = [...toProcess].filter(id => !!sheetRows[id]).length;
+  document.getElementById('statSkip').textContent = candidateFolders.length - toProcess.size;
+
+  // Step 3: process only folders that need it
+  for (let i = 0; i < candidateFolders.length; i++) {
+    const f = candidateFolders[i];
+    document.getElementById('progressLabel').textContent = f.name;
+
+    const inSheet = sheetRows[f.id];
+
+    if (!toProcess.has(f.id)) {
+      // Skip — data already loaded from sheet in loadSheetData, don't push again
+      skipCount++;
+      document.getElementById('statSkip').textContent = skipCount;
+      setFS(f.id, 's-skip', '✓ Sem alteração');
+      log(`[${i+1}/${totalFolders}] Pulado: ${f.name}`, 'skip');
+    } else {
+      const sheetData = inSheet ? inSheet.data : null;
+      const sheetStatus = sheetData && statusIdx >= 0 ? (sheetData[statusIdx] || '').trim() : '';
+      setFS(f.id, 's-proc', 'Processando...');
+      const motivo = !inSheet ? '🆕 Novo' : sheetStatus !== 'Completo' ? '⚠ Dados incompletos' : '🔄 Arquivo novo';
+      log(`[${i+1}/${totalFolders}] ${motivo}: ${f.name}`, 'info');
+
+      try {
+        const d = await processFolder(f);
+        const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        d.ULTIMA_EXTRACAO = now;
+        d.PASTA_DRIVE = f.name;
+        d.FOLDER_ID = f.id;
+        if (!d.DATA_HORA_CADASTRO) d.DATA_HORA_CADASTRO = now;
+        d.STATUS_EXTRACAO = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '') ? 'Completo' : 'Incompleto';
+
+        // Replace or add in extractedData (avoid duplicates)
+        const existIdx = extractedData.findIndex(e => e.FOLDER_ID === f.id);
+        if (existIdx >= 0) {
+          extractedData[existIdx] = d; // update in place
+        } else {
+          extractedData.push(d); // new entry
+        }
+
+        // Save to Google Sheets
+        await saveToSheet(d, inSheet);
+
+        if (inSheet) { updateCount++; document.getElementById('statUpdate').textContent = updateCount; setFS(f.id, 's-update', '🔄 Atualizado'); }
+        else { newCount++; document.getElementById('statNew').textContent = newCount; setFS(f.id, 's-ok', '✓ Extraído'); newCandidateIds.add(f.id); }
+
+        log('✓ ' + (d.NOME || f.name), 'ok');
+        processed++;
+      } catch(e) {
+        setFS(f.id, 's-err', '✗ Erro');
+        log('✗ ' + f.name + ': ' + e.message, 'err');
+        extractedData.push({ PASTA_DRIVE: f.name, FOLDER_ID: f.id });
+      }
+    }
+
+    const pct = Math.round(((i+1)/totalFolders)*100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+  }
+
+  log(`✅ Concluído! ${processed} candidato(s) processado(s).`, 'ok');
+  document.getElementById('progressLabel').textContent = 'Concluído!';
+  setTimeout(showResults, 800);
+}
+
+function buildDataFromSheet(sheetInfo) {
+  const d = {};
+  COLUMNS.forEach((col, idx) => { d[col] = sheetInfo.data[idx] || ''; });
+  return d;
+}
+
+async function saveToSheet(d, existingRow) {
+  const row = COLUMNS.map(col => d[col] || '');
+
+  if (existingRow) {
+    // Update existing row in place — no duplicates
+    const range = `A${existingRow.rowIndex}:AN${existingRow.rowIndex}`;
+    await sheetsUpdate(range, [row]);
+    // Update local cache
+    sheetRows[d.FOLDER_ID] = { ...existingRow, ultimaExtracao: d.ULTIMA_EXTRACAO, data: row };
+  } else {
+    // Before appending, double-check no duplicate exists in sheet
+    const checkRes = await sheetsGet('A1:AO2000');
+    const allRows = checkRes.values || [];
+    const folderIdCol = COLUMNS.indexOf('FOLDER_ID');
+    let existingRowIndex = -1;
+    for (let i = 1; i < allRows.length; i++) {
+      if ((allRows[i][folderIdCol] || '') === d.FOLDER_ID) {
+        existingRowIndex = i + 1; // 1-based
+        break;
+      }
+    }
+
+    if (existingRowIndex > 0) {
+      // Found duplicate — update instead of append
+      const range = `A${existingRowIndex}:AN${existingRowIndex}`;
+      await sheetsUpdate(range, [row]);
+      sheetRows[d.FOLDER_ID] = { rowIndex: existingRowIndex, ultimaExtracao: d.ULTIMA_EXTRACAO, data: row };
+      log('Linha existente atualizada (evitou duplicata).', 'warn');
+    } else {
+      // Truly new — append
+      await sheetsAppend([row]);
+      // Re-read to get accurate row index
+      const res2 = await sheetsGet('A1:AO2000');
+      const rows2 = res2.values || [];
+      const lastRowIdx = rows2.length;
+      sheetRows[d.FOLDER_ID] = { rowIndex: lastRowIdx, ultimaExtracao: d.ULTIMA_EXTRACAO, data: row };
+    }
+  }
+}
+
+// ── Process folder ──
+async function processFolder(folder) {
+  const res = await driveList({
+    q: `'${folder.id}' in parents and trashed=false`,
+    fields: 'files(id,name,mimeType,modifiedTime,createdTime)',
+    pageSize: 50
+  });
+  const files = res.files || [];
+  let textContent = `Pasta: ${folder.name}\n\n`;
+  let imageFiles = [];
+  const docTypes = {};
+
+  for (const file of files) {
+    const fname = file.name.toUpperCase();
+
+    // Detect document type from filename for SIM/NAO fields
+    if (fname.includes('CURRICULO') || fname.includes('CURR')) docTypes.CURRICULO = 'SIM';
+    if (fname.includes('SELFIE')) docTypes.FOTO_SELFIE = 'SIM';
+    if (fname.includes('RG_FRENTE') || fname.includes('RG FRENTE') || (fname.includes('RG') && fname.includes('FRENTE'))) docTypes.RG_FRENTE = 'SIM';
+    if (fname.includes('RG_VERSO') || fname.includes('RG VERSO') || (fname.includes('RG') && fname.includes('VERSO'))) docTypes.RG_VERSO = 'SIM';
+    if (fname.includes('ANTECEDENTE')) docTypes.ATESTADO_ANTECEDENTES = 'SIM';
+
+    // Detect document type label to tell Claude what it is
+    let docLabel = 'DOCUMENTO';
+    if (fname.includes('RG_FRENTE') || (fname.includes('RG') && fname.includes('FRENTE'))) docLabel = 'RG_FRENTE — extraia: RG_NUMERO, RG_ORGAO_EMISSOR, RG_UF, RG_DATA_EXPEDICAO, NOME, DATA_NASCIMENTO, NOME_PAI, NOME_MAE, NATURALIDADE';
+    else if (fname.includes('RG_VERSO') || (fname.includes('RG') && fname.includes('VERSO'))) docLabel = 'RG_VERSO — extraia: RG_NUMERO, dados do verso do RG';
+    else if (fname.includes('CPF')) docLabel = 'CPF — extraia: NUMERO_CPF, NOME';
+    else if (fname.includes('CTPS')) docLabel = 'CTPS — extraia: NUMERO_CTPS, SERIE_CTPS, UF_CTPS, NOME, DATA_NASCIMENTO, NOME_PAI, NOME_MAE';
+    else if (fname.includes('PIS')) docLabel = 'PIS/PASEP — extraia: NUMERO_PIS';
+    else if (fname.includes('TITULO') || fname.includes('TÍTULO')) docLabel = 'TITULO_ELEITOR — extraia: NUMERO_TITULO_ELEITOR, ZONA_ELEITOR, SECAO_ELEITOR, NOME, DATA_NASCIMENTO';
+    else if (fname.includes('RESERVISTA')) docLabel = 'RESERVISTA — extraia: NUMERO_RESERVISTA, NOME';
+    else if (fname.includes('CURRICULO') || fname.includes('CURR')) docLabel = 'CURRICULO — extraia: NOME, DATA_NASCIMENTO, ENDERECO, CIDADE, ESTADO, CEP, TELEFONE, EMAIL, NOME_EMPRESA_ATUAL, CARGO_ATUAL, ESCOLARIDADE';
+    else if (fname.includes('SELFIE')) docLabel = 'SELFIE — foto do candidato';
+    else if (fname.includes('ANTECEDENTE')) docLabel = 'ATESTADO_ANTECEDENTES — extraia: NOME, CPF se visível';
+    else if (fname.includes('COMPROVANTE') || fname.includes('ENDERECO')) docLabel = 'COMPROVANTE_ENDERECO — extraia: ENDERECO, NUMERO_ENDERECO, BAIRRO, CIDADE, ESTADO, CEP';
+    else if (fname.includes('BANCO') || fname.includes('BANCARIO')) docLabel = 'DADOS_BANCARIOS — extraia: DADOS_BANCARIOS banco agência conta';
+
+    try {
+      const mt = file.mimeType;
+
+      // ── Google Docs nativo ──
+      if (mt === 'application/vnd.google-apps.document') {
+        const c = await driveExport(file.id, 'text/plain').catch(() => '');
+        if (c && c.trim().length > 10)
+          textContent += `=== TIPO: ${docLabel} ===\n${c.substring(0,4000)}\n\n`;
+
+      // ── Google Sheets nativo ──
+      } else if (mt === 'application/vnd.google-apps.spreadsheet') {
+        const c = await driveExport(file.id, 'text/csv').catch(() => '');
+        if (c) textContent += `=== TIPO: ${docLabel} (planilha) ===\n${c.substring(0,3000)}\n\n`;
+
+      // ── PDF ──
+      } else if (mt === 'application/pdf') {
+        // Try text extraction first (works for text-based PDFs)
+        const c = await driveExport(file.id, 'text/plain').catch(() => '');
+        if (c && c.replace(/\s/g,'').length > 30) {
+          textContent += `=== TIPO: ${docLabel} ===\n${c.substring(0,4000)}\n\n`;
+        } else {
+          // Scanned PDF — send as PDF document type (Claude supports it natively)
+          const b64 = await driveDownloadBase64(file.id).catch(() => null);
+          if (b64) imageFiles.push({ name: file.name, label: docLabel, b64, mime: 'application/pdf', isDoc: true });
+          else textContent += `=== TIPO: ${docLabel} (PDF sem texto detectável) ===\n\n`;
+        }
+
+      // ── Word .docx / .doc ──
+      } else if (mt.includes('word') || mt === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mt === 'application/msword') {
+        // Must upload to Drive as Google Doc first to export — fallback: download raw and send as binary text
+        // Best approach: copy to Google Docs format via Drive API
+        let extracted = false;
+        try {
+          // Try copy-as-Google-Doc then export
+          const copyRes = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/copy`, {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mimeType: 'application/vnd.google-apps.document', name: file.name + '_tmp' })
+          });
+          if (copyRes.ok) {
+            const copyData = await copyRes.json();
+            const c = await driveExport(copyData.id, 'text/plain').catch(() => '');
+            // Delete the temp copy
+            fetch(`https://www.googleapis.com/drive/v3/files/${copyData.id}`, {
+              method: 'DELETE', headers: { Authorization: 'Bearer ' + accessToken }
+            }).catch(() => {});
+            if (c && c.trim().length > 10) {
+              textContent += `=== TIPO: ${docLabel} ===\n${c.substring(0,4000)}\n\n`;
+              extracted = true;
+            }
+          }
+        } catch(copyErr) {}
+        if (!extracted) {
+          // Final fallback: download raw bytes and try as text
+          const c = await driveDownload(file.id).catch(() => '');
+          const readable = c.replace(/[^\x20-\x7E\xC0-\xFF\n\r\t]/g,' ').replace(/\s+/g,' ').trim();
+          if (readable.length > 50)
+            textContent += `=== TIPO: ${docLabel} (texto parcial) ===\n${readable.substring(0,3000)}\n\n`;
+        }
+
+      // ── Imagens (todos os formatos comuns) ──
+      } else if (['image/jpeg','image/jpg','image/png','image/webp','image/gif','image/bmp','image/tiff','image/heic','image/heif'].includes(mt)) {
+        const safeMime = ['image/jpeg','image/png','image/webp','image/gif'].includes(mt) ? mt : 'image/jpeg';
+        const b64 = await driveDownloadBase64(file.id).catch(() => null);
+        if (b64) imageFiles.push({ name: file.name, label: docLabel, b64, mime: safeMime === 'image/jpg' ? 'image/jpeg' : safeMime });
+
+      // ── ODT / RTF / outros formatos de texto ──
+      } else if (mt === 'application/vnd.oasis.opendocument.text' || mt === 'application/rtf' || mt === 'text/rtf') {
+        const copyRes = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/copy`, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mimeType: 'application/vnd.google-apps.document', name: file.name + '_tmp' })
+        }).catch(() => null);
+        if (copyRes && copyRes.ok) {
+          const copyData = await copyRes.json();
+          const c = await driveExport(copyData.id, 'text/plain').catch(() => '');
+          fetch(`https://www.googleapis.com/drive/v3/files/${copyData.id}`, {
+            method: 'DELETE', headers: { Authorization: 'Bearer ' + accessToken }
+          }).catch(() => {});
+          if (c) textContent += `=== TIPO: ${docLabel} ===\n${c.substring(0,4000)}\n\n`;
+        }
+
+      // ── Texto puro / CSV / JSON ──
+      } else if (mt.startsWith('text/') || mt === 'application/json') {
+        const c = await driveDownload(file.id).catch(() => '');
+        if (c) textContent += `=== TIPO: ${docLabel} ===\n${c.substring(0,3000)}\n\n`;
+
+      // ── Tipo desconhecido — registrar no texto ──
+      } else {
+        textContent += `=== TIPO: ${docLabel} (formato ${mt} não suportado) ===\n\n`;
+      }
+
+    } catch(e) {
+      log(`⚠ Erro ao ler ${file.name}: ${e.message}`, 'warn');
+      textContent += `=== TIPO: ${docLabel} (erro ao processar arquivo) ===\n\n`;
+    }
+  }
+
+  const extracted = await callClaude(textContent, folder.name, imageFiles);
+
+  // Only use docTypes for SIM/NAO fields — never overwrite real extracted data
+  Object.entries(docTypes).forEach(([k,v]) => {
+    if (!extracted[k] || extracted[k] === 'null' || extracted[k] === '') {
+      extracted[k] = v;
+    }
+  });
+
+  // Store selfie base64 for avatar display (not saved to sheet)
+  const selfieImg = imageFiles.find(f => f.name.toUpperCase().includes('SELFIE'));
+  if (selfieImg) extracted._selfieB64 = `data:${selfieImg.mime};base64,${selfieImg.b64}`;
+
+  // Store all file metadata for document viewer (not saved to sheet)
+  extracted._files = files.map(f => ({
+    id: f.id, name: f.name, mimeType: f.mimeType
+  }));
+  extracted._folderId = folder.id;
+
+  return extracted;
+}
+
+// ── Claude API ──
+async function callClaude(text, folderName, imageFiles = []) {
+  const phone = folderName.split(' - ')[0] || '';
+  const nomePasta = folderName.split(' - ').slice(1).join(' - ') || '';
+
+  const prompt = `Você é um analista forense de documentos brasileiros de RH. Sua missão é extrair dados reais dos documentos com máxima precisão.
+
+REGRAS ABSOLUTAS:
+1. Retorne SOMENTE o JSON preenchido — sem markdown, sem texto, sem comentários
+2. Cada campo recebe APENAS o dado específico — NUNCA o nome do arquivo
+3. Campos como RG_FRENTE e RG_VERSO recebem SOMENTE "SIM" ou null — NUNCA o nome do arquivo
+4. RG_NUMERO recebe APENAS os dígitos do RG (ex: 56.377.287-6) — leia das imagens
+5. NUMERO_CPF recebe APENAS os dígitos do CPF (ex: 123.456.789-00) — leia das imagens
+6. NUMERO_CTPS recebe APENAS o número da carteira — leia das imagens
+7. NUMERO_PIS recebe APENAS os dígitos do PIS — leia das imagens
+8. NUMERO_TITULO_ELEITOR recebe APENAS o número do título — leia das imagens
+9. Formatos obrigatórios: CPF=000.000.000-00 | RG=00.000.000-0 | CEP=00000-000 | Datas=DD/MM/AAAA
+10. Órgão emissor do RG vai em RG_ORGAO_EMISSOR (ex: SSP) e UF em RG_UF (ex: SP) — SEPARADOS
+11. CTPS: número em NUMERO_CTPS, série em SERIE_CTPS, UF em UF_CTPS — SEPARADOS
+12. Título: número em NUMERO_TITULO_ELEITOR, zona em ZONA_ELEITOR, seção em SECAO_ELEITOR — SEPARADOS
+13. Endereço: rua em ENDERECO, número em NUMERO_ENDERECO, bairro em BAIRRO, cidade em CIDADE, sigla estado em ESTADO
+14. Use null para dados genuinamente não encontrados nos documentos
+15. A pasta tem formato "telefone - Nome" — use para TELEFONE e NOME se não encontrar nos docs
+
+ATENÇÃO ESPECIAL ÀS IMAGENS:
+- Cada imagem tem um rótulo dizendo o tipo de documento
+- Leia o conteúdo REAL da imagem — números, nomes, datas visíveis
+- RG_FRENTE: leia o número do RG, nome, filiação, data nascimento, órgão emissor
+- CTPS: leia o número, série, UF da carteira
+- CPF: leia o número do CPF
+- Título eleitor: leia o número, zona, seção
+- NÃO copie o nome do arquivo — leia os dados reais do documento
+
+JSON:
+{
+  "TELEFONE": "${phone}",
+  "NOME": "${nomePasta}",
+  "CURRICULO": null,
+  "FOTO_SELFIE": null,
+  "NUMERO_CTPS": null,
+  "SERIE_CTPS": null,
+  "UF_CTPS": null,
+  "NUMERO_PIS": null,
+  "NUMERO_RESERVISTA": null,
+  "RG_NUMERO": null,
+  "RG_ORGAO_EMISSOR": null,
+  "RG_UF": null,
+  "RG_DATA_EXPEDICAO": null,
+  "RG_FRENTE": null,
+  "RG_VERSO": null,
+  "NUMERO_CPF": null,
+  "ATESTADO_ANTECEDENTES": null,
+  "NOME_PAI": null,
+  "NOME_MAE": null,
+  "NUMERO_TITULO_ELEITOR": null,
+  "ZONA_ELEITOR": null,
+  "SECAO_ELEITOR": null,
+  "ENDERECO": null,
+  "NUMERO_ENDERECO": null,
+  "COMPLEMENTO": null,
+  "BAIRRO": null,
+  "CIDADE": null,
+  "ESTADO": null,
+  "CEP": null,
+  "DATA_NASCIMENTO": null,
+  "DADOS_BANCARIOS": null,
+  "METODO_PIX": null,
+  "CHAVE_PIX": null,
+  "NOME_EMPRESA_ATUAL": null,
+  "CARGO_ATUAL": null,
+  "DATA_HORA_CADASTRO": null,
+  "ULTIMA_EXTRACAO": null,
+  "STATUS_EXTRACAO": null,
+  "PASTA_DRIVE": null,
+  "FOLDER_ID": null
+}
+
+Documentos:
+${text.substring(0,3500)}`;
+
+  const msgContent = [{ type: 'text', text: prompt }];
+  const validFiles = imageFiles.filter(i => i.b64 && i.b64.length > 0).slice(0, 5);
+  for (const img of validFiles) {
+    msgContent.push({ type: 'text', text: `=== DOCUMENTO: ${img.label || img.name} === Leia todos os dados visíveis:` });
+    if (img.isDoc || img.mime === 'application/pdf') {
+      // Send PDF as document block (Claude native support)
+      msgContent.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.b64 } });
+    } else if (['image/jpeg','image/png','image/webp','image/gif'].includes(img.mime)) {
+      // Send image as image block
+      msgContent.push({ type: 'image', source: { type: 'base64', media_type: img.mime, data: img.b64 } });
+    }
+    // Skip unsupported mimes silently
+  }
+
+  const r = await fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json',  'anthropic-version': '2023-06-01',  },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: msgContent }] })
+  });
+  if (!r.ok) { const e = await r.text(); throw new Error('Claude ' + r.status + ': ' + e.substring(0,100)); }
+  const data = await r.json();
+  const raw = (data.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
+  try { return JSON.parse(raw); } catch(e) { throw new Error('JSON inválido: ' + raw.substring(0,80)); }
+}
+
+// ── Results ──
+function showResults() {
+  // Remove duplicates from extractedData by FOLDER_ID before showing
+  const seen = new Set();
+  extractedData = extractedData.filter(d => {
+    const fid = d.FOLDER_ID || d.PASTA_DRIVE || Math.random().toString();
+    if (seen.has(fid)) return false;
+    seen.add(fid);
+    return true;
+  });
+
+  goStep(3);
+  buildCandidateCards();
+  buildResultsTable();
+}
+
+// ── Build Results Table (standalone, callable anytime) ──
+function buildResultsTable() {
+  const complete = extractedData.filter(d => REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '')).length;
+  document.getElementById('r-total').textContent = extractedData.length;
+  document.getElementById('r-complete').textContent = complete;
+  document.getElementById('r-incomplete').textContent = extractedData.length - complete;
+  document.getElementById('r-updated').textContent = updateCount || 0;
+  document.getElementById('resultSummary').textContent =
+    `${complete} completos · ${extractedData.length - complete} incompletos · ${updateCount || 0} atualizados`;
+
+  const tbody = document.getElementById('resultsBody');
+  const frag = document.createDocumentFragment();
+  tbody.innerHTML = '';
+
+  extractedData.forEach((d, i) => {
+    const ok = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '');
+    // Count missing REQUIRED fields
+    const missingCount = REQUIRED.filter(k => !d[k] || d[k] === 'null' || d[k] === '').length;
+    const isUpd = d._wasUpdated;
+    const chipCls = ok ? 'chip-ok' : isUpd ? 'chip-update' : 'chip-warn';
+    const chipTxt = ok ? '✓ Completo' : `⚠ ${missingCount} faltando`;
+
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.title = 'Clique para ver detalhes';
+    tr.onclick = () => { goStep(4); setTimeout(() => { const cards = document.querySelectorAll('.cand-card'); if (cards[i]) { openModal(i); } }, 300); };
+    tr.innerHTML = `
+      <td><span class="num">${String(i+1).padStart(2,'0')}</span></td>
+      <td class="primary">${d.NOME||'—'}</td>
+      <td class="mono">${d.NUMERO_CPF||'—'}</td>
+      <td class="mono">${d.RG_NUMERO||'—'}</td>
+      <td>${d.DATA_NASCIMENTO||'—'}</td>
+      <td>${d.NOME_PAI||'—'}</td>
+      <td>${d.NOME_MAE||'—'}</td>
+      <td class="mono">${d.TELEFONE||'—'}</td>
+      <td>${d.CIDADE||'—'}</td>
+      <td>${d.ESTADO||'—'}</td>
+      <td class="mono">${d.NUMERO_PIS||'—'}</td>
+      <td class="mono">${d.NUMERO_CTPS||'—'}</td>
+      <td class="mono">${d.NUMERO_TITULO_ELEITOR||'—'}</td>
+      <td><span class="chip ${chipCls}" style="white-space:nowrap">${chipTxt}</span></td>`;
+    frag.appendChild(tr);
+  });
+  tbody.appendChild(frag);
+
+  // Show nav3 and nav4
+  ['nav3','nav4','mnav3','mnav4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
+}
+
+// ── Export CSV ──
+function downloadCSV() {
+  const rows = [COLUMNS.join(';')];
+  extractedData.forEach(d => {
+    rows.push(COLUMNS.map(col => {
+      const val = (d[col] ?? '').toString().replace(/"/g,'""').replace(/\n/g,' ').trim();
+      if (NUMERIC_FIELDS.includes(col) && val) return `"=""${val}"""`;
+      return `"${val}"`;
+    }).join(';'));
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\n')], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'candidatos_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ── Incomplete Report ──
+function downloadIncompleteReport() {
+  const incomplete = extractedData.filter(d => !REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== ''));
+  if (!incomplete.length) { alert('Todos os candidatos estão completos!'); return; }
+
+  let html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Incompletos</title>
+<style>
+body{font-family:Segoe UI,sans-serif;background:#f8fafc;color:#1e293b;padding:40px}
+h1{font-size:24px;margin-bottom:4px}
+.sub{color:#64748b;font-size:14px;margin-bottom:32px}
+.card{background:white;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:24px;overflow:hidden}
+.ch{background:#fef9f0;border-bottom:1px solid #fde68a;padding:14px 20px;display:flex;justify-content:space-between}
+.cn{font-size:16px;font-weight:600}
+.mt{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#ef4444;padding:10px 20px 4px}
+.ml{display:flex;flex-wrap:wrap;gap:6px;padding:4px 20px 14px}
+.tag{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:12px;padding:3px 10px;border-radius:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr)}
+.fr{padding:8px 16px;border-bottom:1px solid #f1f5f9}
+.fr:nth-child(3n+1){background:#fafafa}
+.fl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:2px}
+.fv{font-size:13px;color:#1e293b;font-weight:500}
+.fv.empty{color:#cbd5e1;font-style:italic}
+.btn{background:#0f172a;color:white;border:none;padding:10px 24px;border-radius:8px;cursor:pointer;margin-bottom:24px}
+@media print{.btn{display:none}}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — iOS & Android
+   ═══════════════════════════════════════ */
+
+/* Mobile bottom nav */
+.mobile-nav {
+  display: none !important;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: var(--panel); border-top: 1px solid var(--border);
+  padding: 6px 0 env(safe-area-inset-bottom, 6px);
+}
+.mobile-nav-items { display: flex; justify-content: space-around; }
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 12px; border-radius: 10px; cursor: pointer;
+  font-size: 10px; color: var(--muted); transition: all 0.15s;
+  min-width: 56px;
+}
+.mobile-nav-item.active { color: var(--accent2); }
+.mobile-nav-item .mn-icon { font-size: 20px; line-height: 1; }
+.mobile-nav-item .mn-badge {
+  position: absolute; top: 2px; right: 8px;
+  background: var(--accent); color: #0a0c12;
+  font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 10px; min-width: 16px; text-align: center;
+}
+.mobile-nav-item { position: relative; }
+
+/* Mobile header */
+.mobile-header {
+  display: none !important;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 199;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  align-items: center; gap: 12px;
+}
+.mobile-header-logo { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--accent2); }
+.mobile-header-sub { font-size: 10px; color: var(--muted); }
+.mobile-status-dots { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+
+@media (max-width: 768px) {
+  .mobile-nav { display: block !important; }
+  .mobile-header { display: flex !important; }
+  .sidebar { display: none !important; }
+  .sidebar-toggle { display: none !important; }
+  .shell { display: block !important; }
+  .main { margin-left: 0 !important; padding: 74px 16px 80px !important; max-width: 100% !important; transition: none !important; }
+  .page-header h2 { font-size: 20px; }
+  .page-header p { font-size: 12px; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat-num { font-size: 24px !important; }
+  .stat-card { padding: 14px 16px !important; }
+  .config-grid { grid-template-columns: 1fr !important; }
+  .cands-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .docs-grid { grid-template-columns: 1fr 1fr !important; gap: 4px !important; padding: 8px 14px 14px !important; }
+  .doc-pill { font-size: 10px !important; padding: 5px 8px !important; }
+  .cand-card-header { padding: 14px 16px 12px !important; }
+  .cand-progress-wrap { padding: 12px 16px 8px !important; }
+  .modal-overlay { padding: 0 !important; align-items: flex-end !important; }
+  .modal { border-radius: 20px 20px 0 0 !important; max-height: 94vh !important; max-width: 100% !important; width: 100% !important; }
+  .modal-header { padding: 18px 18px 14px !important; }
+  .modal-name { font-size: 17px !important; }
+  .modal-body { padding: 14px 18px 20px !important; }
+  #modalMissingDocs { padding: 12px 18px 0 !important; }
+  .docs-checklist { grid-template-columns: 1fr !important; gap: 8px !important; }
+  .data-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .completion-ring { padding: 14px !important; }
+  .log-panel { height: 110px !important; font-size: 11px !important; }
+  .cand-list { max-height: 200px !important; }
+  .btn { padding: 10px 14px !important; font-size: 12px !important; }
+  .btn-row { gap: 8px !important; flex-wrap: wrap !important; }
+  .results-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+  .results-header .btn-row .btn { font-size: 11px !important; padding: 9px 10px !important; }
+  .table-scroll { -webkit-overflow-scrolling: touch; }
+  .search-bar { flex-wrap: wrap !important; }
+  .search-input { width: 100% !important; }
+  .filter-btn { flex: 1 !important; text-align: center !important; font-size: 11px !important; padding: 8px 6px !important; }
+  .btn-whatsapp { width: 100% !important; justify-content: center !important; }
+  .info-box { font-size: 12px !important; }
+  .divider { margin: 0 0 20px !important; }
+  .progress-wrap { padding: 16px !important; }
+}
+
+@media (max-width: 380px) {
+  .main { padding: 70px 12px 76px !important; }
+  .docs-grid { grid-template-columns: 1fr !important; }
+  .data-grid { grid-template-columns: 1fr !important; }
+}
+  .cands-grid { gap: 10px !important; }
+  .docs-grid { grid-template-columns: 1fr !important; }
+  .data-grid { grid-template-columns: 1fr !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+}
+</style></head><body>
+<button class="btn" onclick="window.print()">🖨 Imprimir</button>
+<h1>Relatório de Candidatos Incompletos</h1>
+<div class="sub">Gerado em ${new Date().toLocaleString('pt-BR')} · ${incomplete.length} candidato(s)</div>`;
+
+  incomplete.forEach(d => {
+    const missing = REQUIRED.filter(k => !d[k]);
+    html += `<div class="card">
+      <div class="ch"><div class="cn">${d.NOME||d.PASTA_DRIVE||'Sem nome'}</div><div style="font-size:12px;color:#94a3b8">${d.TELEFONE||''}</div></div>
+      <div class="mt">Campos obrigatórios em falta (${missing.length})</div>
+      <div class="ml">${missing.map(f=>`<span class="tag">${f}</span>`).join('')}</div>
+      <div class="grid">
+      ${COLUMNS.filter(c=>!['FOLDER_ID','STATUS_EXTRACAO'].includes(c)).map(col=>`
+        <div class="fr"><div class="fl">${col.replace(/_/g,' ')}</div>
+        <div class="fv ${d[col]?'':'empty'}">${d[col]||'não encontrado'}</div></div>`).join('')}
+      </div></div>`;
+  });
+
+  html += '</body></html>';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8;'}));
+  a.download = 'incompletos_' + new Date().toISOString().slice(0,10) + '.html';
+  a.click();
+}
+
+// ── Reset ──
+// ── Step 4: Candidate cards ──
+const DOC_DEFINITIONS = [
+  { key: 'CURRICULO',             label: 'Currículo',           icon: '📄', type: 'doc',  desc: 'Arquivo enviado' },
+  { key: 'FOTO_SELFIE',           label: 'Foto Selfie',         icon: '🤳', type: 'doc',  desc: 'Foto enviada' },
+  { key: 'RG_FRENTE',             label: 'RG Frente',           icon: '🪪', type: 'doc',  desc: 'Foto da frente enviada' },
+  { key: 'RG_VERSO',              label: 'RG Verso',            icon: '🪪', type: 'doc',  desc: 'Foto do verso enviada' },
+  { key: 'RG_NUMERO',             label: 'Número do RG',        icon: '🔢', type: 'data', desc: 'Número extraído do RG' },
+  { key: 'NUMERO_CPF',            label: 'CPF',                 icon: '📋', type: 'data', desc: 'Número do CPF' },
+  { key: 'NUMERO_CTPS',           label: 'CTPS',                icon: '📒', type: 'data', desc: 'Número da carteira' },
+  { key: 'NUMERO_PIS',            label: 'PIS/PASEP',           icon: '🔢', type: 'data', desc: 'Número do PIS' },
+  { key: 'NUMERO_RESERVISTA',     label: 'Reservista',          icon: '🎖️', type: 'data', desc: 'Número do certificado' },
+  { key: 'ATESTADO_ANTECEDENTES', label: 'Antecedentes',        icon: '📜', type: 'doc',  desc: 'Atestado enviado' },
+  { key: 'NOME_PAI',              label: 'Nome do Pai',         icon: '👨', type: 'data', desc: 'Nome completo do pai' },
+  { key: 'NOME_MAE',              label: 'Nome da Mãe',         icon: '👩', type: 'data', desc: 'Nome completo da mãe' },
+  { key: 'NUMERO_TITULO_ELEITOR', label: 'Título de Eleitor',   icon: '🗳️', type: 'data', desc: 'Número do título' },
+  { key: 'ENDERECO',              label: 'Endereço',            icon: '🏠', type: 'data', desc: 'Logradouro completo' },
+  { key: 'DADOS_BANCARIOS',       label: 'Dados Bancários',     icon: '🏦', type: 'data', desc: 'Banco / Agência / Conta' },
+  { key: 'CHAVE_PIX',             label: 'Chave PIX',           icon: '💳', type: 'data', desc: 'Chave cadastrada' },
+  { key: 'DATA_NASCIMENTO',       label: 'Data de Nascimento',  icon: '🎂', type: 'data', desc: 'DD/MM/AAAA' },
+];
+
+const DATA_SECTIONS = [
+  { title: 'Identificação', fields: [
+    ['NOME','Nome Completo'], ['DATA_NASCIMENTO','Data Nascimento'], ['NUMERO_CPF','CPF'],
+    ['RG_NUMERO','RG'], ['RG_ORGAO_EMISSOR','Órgão Emissor'], ['RG_UF','UF RG'],
+    ['RG_DATA_EXPEDICAO','Data Expedição RG'],
+  ]},
+  { title: 'Filiação', fields: [
+    ['NOME_PAI','Nome do Pai'], ['NOME_MAE','Nome da Mãe'],
+  ]},
+  { title: 'Documentos Trabalhistas', fields: [
+    ['NUMERO_CTPS','Nº CTPS'], ['SERIE_CTPS','Série'], ['UF_CTPS','UF CTPS'],
+    ['NUMERO_PIS','PIS/PASEP'], ['NUMERO_RESERVISTA','Reservista'],
+  ]},
+  { title: 'Título de Eleitor', fields: [
+    ['NUMERO_TITULO_ELEITOR','Nº Título'], ['ZONA_ELEITOR','Zona'], ['SECAO_ELEITOR','Seção'],
+  ]},
+  { title: 'Endereço', fields: [
+    ['ENDERECO','Logradouro'], ['NUMERO_ENDERECO','Número'], ['COMPLEMENTO','Complemento'],
+    ['BAIRRO','Bairro'], ['CIDADE','Cidade'], ['ESTADO','UF'], ['CEP','CEP'],
+  ]},
+  { title: 'Contato', fields: [
+    ['TELEFONE','Telefone'], ['CHAVE_PIX','Chave PIX'], ['METODO_PIX','Tipo PIX'],
+  ]},
+  { title: 'Dados Bancários', fields: [
+    ['DADOS_BANCARIOS','Banco / Agência / Conta'],
+  ]},
+  { title: 'Profissional', fields: [
+    ['NOME_EMPRESA_ATUAL','Empresa Atual'], ['CARGO_ATUAL','Cargo'],
+  ]},
+];
+
+let currentFilter = 'all';
+
+// Track which candidates are "new" (inserted this session, not updated/skipped)
+let newCandidateIds = new Set();
+
+function buildCandidateCards() {
+  const grid = document.getElementById('candsGrid');
+  const frag = document.createDocumentFragment();
+
+  // Count new candidates for badge
+  const newCount2 = extractedData.filter(d => newCandidateIds.has(d.FOLDER_ID)).length;
+  const btnNew = document.getElementById('fNew');
+  if (btnNew) {
+    btnNew.textContent = newCount2 > 0 ? `🆕 Novos (${newCount2})` : '🆕 Novos';
+  }
+  const btnProcessNew = document.getElementById('btnProcessNew');
+  if (btnProcessNew) {
+    btnProcessNew.style.display = newCount2 > 0 ? '' : 'none';
+  }
+
+  extractedData.forEach((d, idx) => {
+    const pastaName = d.PASTA_DRIVE || '';
+    const nome = (d.NOME && d.NOME !== 'null' && d.NOME.trim() !== '') ? d.NOME : (pastaName.includes(' - ') ? pastaName.split(' - ').slice(1).join(' - ') : pastaName) || 'Sem nome';
+    const telefone = d.TELEFONE || '';
+    const initials = nome.trim().split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+
+    const total = COMPLETION_FIELDS.length;
+    const filled = COMPLETION_FIELDS.filter(k => d[k] && d[k] !== 'null' && d[k] !== '').length;
+    const pct = Math.round((filled / total) * 100);
+    const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
+    const isComplete = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '');
+    const isNew = newCandidateIds.has(d.FOLDER_ID);
+
+    const pillsHtml = DOC_DEFINITIONS.slice(0,8).map(def => {
+      const val = d[def.key];
+      const has = val && val !== 'null' && val !== '';
+      const cls = has ? 'ok' : 'miss';
+      return `<div class="doc-pill ${cls}"><div class="doc-dot ${cls}"></div>${def.label}</div>`;
+    }).join('');
+
+    const card = document.createElement('div');
+    card.className = 'cand-card';
+    card.dataset.nome = nome.toLowerCase();
+    card.dataset.telefone = telefone;
+    card.dataset.complete = isComplete ? 'complete' : 'incomplete';
+    card.dataset.isnew = isNew ? 'new' : 'existing';
+    card.onclick = () => openModal(idx);
+    card.innerHTML = `
+      <div class="cand-card-header">
+        <div class="cand-avatar-big" style="${d._selfieB64 ? 'padding:0;overflow:hidden;background:none;' : ''}">
+          ${d._selfieB64
+            ? `<img src="${d._selfieB64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="selfie" loading="lazy">`
+            : (initials || '?')
+          }
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="cand-card-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
+          <div class="cand-card-phone">${telefone || '—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          ${isNew ? '<span style="background:rgba(129,140,248,0.15);color:var(--blue);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.5px">🆕 NOVO</span>' : ''}
+          <span class="chip ${isComplete?'chip-ok':'chip-warn'}">${isComplete?'✓ Completo':'⚠ Incompleto'}</span>
+        </div>
+      </div>
+      <div class="cand-progress-wrap">
+        <div class="cand-progress-label">
+          <span>Documentação</span>
+          <span style="color:${color}">${pct}%</span>
+        </div>
+        <div class="cand-bar"><div class="cand-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>
+      <div class="docs-grid">${pillsHtml}</div>`;
+    frag.appendChild(card);
+  });
+
+  grid.innerHTML = '';
+  grid.appendChild(frag);
+}
+
+function setFilter(mode) {
+  currentFilter = mode;
+  ['fAll','fNew','fComplete','fIncomplete'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  const activeMap = { all:'fAll', new:'fNew', complete:'fComplete', incomplete:'fIncomplete' };
+  const activeEl = document.getElementById(activeMap[mode]);
+  if (activeEl) activeEl.classList.add('active');
+  filterCards();
+}
+
+const filterCards = debounce(function _filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.cand-card').forEach(card => {
+    const matchSearch = !q || card.dataset.nome.includes(q) || card.dataset.telefone.includes(q);
+    let matchFilter = true;
+    if (currentFilter === 'complete') matchFilter = card.dataset.complete === 'complete';
+    else if (currentFilter === 'incomplete') matchFilter = card.dataset.complete === 'incomplete';
+    else if (currentFilter === 'new') matchFilter = card.dataset.isnew === 'new';
+    card.style.display = matchSearch && matchFilter ? '' : 'none';
+  });
+}, 120);
+
+// Process only new candidates
+async function processOnlyNew() {
+  const newCands = candidateFolders.filter(f => newCandidateIds.has(f.id));
+  if (newCands.length === 0) { alert('Nenhum candidato novo para processar.'); return; }
+  goStep(2);
+  setTimeout(async () => {
+    const btn = document.getElementById('btnProcess');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
+    log(`🆕 Processando somente ${newCands.length} candidato(s) novo(s)...`, 'info');
+    let done = 0;
+    for (const folder of newCands) {
+      try {
+        log(`📂 ${folder.name}`, 'info');
+        const extracted = await processFolder(folder);
+        extracted.ULTIMA_EXTRACAO = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        extracted.STATUS_EXTRACAO = REQUIRED.every(k => extracted[k] && extracted[k] !== 'null' && extracted[k] !== '') ? 'Completo' : 'Incompleto';
+        const existingIdx = extractedData.findIndex(e => e.FOLDER_ID === folder.id);
+        if (existingIdx >= 0) extractedData[existingIdx] = extracted;
+        else extractedData.push(extracted);
+        await saveToSheet(extracted, sheetRows[folder.id]);
+        log(`✓ ${folder.name} salvo`, 'ok');
+      } catch(e) {
+        log(`✗ Erro: ${folder.name}: ${e.message}`, 'err');
+      }
+      done++;
+      const pct = Math.round((done / newCands.length) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressPct').textContent = pct + '%';
+    }
+    buildCandidateCards();
+    buildResultsTable();
+    if (btn) { btn.disabled = false; btn.textContent = 'Iniciar Extração'; }
+    log(`✅ Processamento de novos concluído.`, 'ok');
+    goStep(4);
+  }, 300);
+}
+
+// ── Results Table filter ──
+let tableFilterMode = 'all';
+function setTableFilter(mode) {
+  tableFilterMode = mode;
+  ['all','complete','incomplete'].forEach(m => {
+    const el = document.getElementById('tf-' + m);
+    if (el) el.classList.toggle('active', m === mode);
+  });
+  filterTable();
+}
+const filterTable = debounce(function _filterTable() {
+  const q = (document.getElementById('tableSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('#resultsBody tr').forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    const statusCell = tr.querySelector('.chip');
+    const statusTxt = (statusCell?.textContent || '').toLowerCase();
+    const matchSearch = !q || text.includes(q);
+    const matchFilter =
+      tableFilterMode === 'all' ||
+      (tableFilterMode === 'complete' && statusTxt.includes('completo')) ||
+      (tableFilterMode === 'incomplete' && !statusTxt.includes('completo'));
+    tr.style.display = matchSearch && matchFilter ? '' : 'none';
+  });
+}, 120);
+
+async function openModal(idx) {
+  const d = extractedData[idx];
+  if (!d) return;
+
+  const nome = d.NOME || d.PASTA_DRIVE || 'Sem nome';
+  const telefone = d.TELEFONE || '—';
+  const realNome = (d.NOME && d.NOME !== 'null' && d.NOME.trim() !== '') ? d.NOME : nome;
+  const realInitials = realNome.trim().split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('').toUpperCase();
+
+  // Open modal immediately with initials while loading
+  const avatarEl = document.getElementById('modalAvatar');
+  avatarEl.textContent = realInitials || '?';
+  avatarEl.style.padding = '';
+  avatarEl.style.overflow = '';
+  document.getElementById('modalName').textContent = realNome;
+  document.getElementById('modalPhone').textContent = telefone;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Load files from Drive in real time
+  const folderId = d.FOLDER_ID || d._folderId || '';
+  let driveFiles = d._files || [];
+
+  if (folderId && accessToken) {
+    try {
+      const res = await driveList({
+        q: `'${folderId}' in parents and trashed=false`,
+        fields: 'files(id,name,mimeType)',
+        pageSize: 30
+      });
+      driveFiles = res.files || [];
+      d._files = driveFiles; // cache
+
+      // Find and load selfie
+      const selfieFile = driveFiles.find(f => f.name.toUpperCase().includes('SELFIE') && f.mimeType.startsWith('image/'));
+      if (selfieFile && !d._selfieB64) {
+        driveDownloadBase64(selfieFile.id).then(b64 => {
+          const mime = selfieFile.mimeType === 'image/jpg' ? 'image/jpeg' : selfieFile.mimeType;
+          const src = `data:${mime};base64,${b64}`;
+          d._selfieB64 = src;
+          avatarEl.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="selfie">`;
+          avatarEl.style.padding = '0';
+          avatarEl.style.overflow = 'hidden';
+          // Update card avatar too
+          buildCandidateCards();
+        }).catch(() => {});
+      } else if (d._selfieB64) {
+        avatarEl.innerHTML = `<img src="${d._selfieB64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="selfie">`;
+        avatarEl.style.padding = '0';
+        avatarEl.style.overflow = 'hidden';
+      }
+    } catch(e) {
+      console.warn('Erro ao listar arquivos:', e.message);
+    }
+  } else if (d._selfieB64) {
+    avatarEl.innerHTML = `<img src="${d._selfieB64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="selfie">`;
+    avatarEl.style.padding = '0';
+    avatarEl.style.overflow = 'hidden';
+  }
+
+  document.getElementById('modalName').textContent = realNome;
+  document.getElementById('modalPhone').textContent = telefone;
+
+  // Completion ring
+  const total = COMPLETION_FIELDS.length;
+  const filled = COMPLETION_FIELDS.filter(k => d[k] && d[k] !== 'null' && d[k] !== '').length;
+  const pct = Math.round((filled/total)*100);
+  const color = pct >= 80 ? '#3ecf8e' : pct >= 50 ? '#fbbf24' : '#f87171';
+  const r = 28, circ = 2*Math.PI*r;
+  const dash = (pct/100)*circ;
+
+  const isCompleteModal = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '');
+  const missingRequired = REQUIRED.filter(k => !d[k] || d[k] === 'null' || d[k] === '');
+  const missingMsg = isCompleteModal ? 'Documentação obrigatória completa ✓' : `${missingRequired.length} campo(s) obrigatório(s) pendente(s)`;
+
+  let body = `
+    <div class="completion-ring">
+      <div class="ring-wrap">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="#1e2330" stroke-width="6"/>
+          <circle cx="32" cy="32" r="${r}" fill="none" stroke="${color}" stroke-width="6"
+            stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-pct" style="color:${color}">${pct}%</div>
+      </div>
+      <div class="ring-info" style="flex:1">
+        <h3>${realNome.split(' ')[0]}</h3>
+        <p style="color:${color}">${missingMsg}</p>
+        <p style="margin-top:4px;color:var(--muted);font-size:11px">Última extração: ${d.ULTIMA_EXTRACAO||'—'}</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Status manual</div>
+        <button onclick="manualSetStatusFromModal(${idx},'Completo')" style="background:rgba(62,207,142,0.12);border:1px solid rgba(62,207,142,0.3);color:#3ecf8e;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">✅ Completo</button>
+        <button onclick="manualSetStatusFromModal(${idx},'Incompleto')" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">⚠️ Incompleto</button>
+        <button onclick="manualSetStatusFromModal(${idx},'Pendente')" style="background:rgba(100,116,139,0.12);border:1px solid rgba(100,116,139,0.3);color:#94a3b8;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">🕐 Pendente</button>
+      </div>
+    </div>
+
+    <div class="modal-section" style="padding-bottom:0">
+      <div class="modal-section-title" style="display:flex;align-items:center;gap:8px">
+        <span>🤖 Upload Inteligente com IA</span>
+        <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;font-family:'Inter',sans-serif">Envie um documento — a IA extrai os dados e preenche tudo automaticamente</span>
+      </div>
+      <div class="smart-upload-zone" id="smartZone_${idx}">
+        <input type="file" id="smartFile_${idx}" accept="image/*,.pdf" style="display:none" onchange="handleSmartDocUpload(event,${idx})">
+        <div class="smart-upload-dropzone" onclick="document.getElementById('smartFile_${idx}').click()">
+          <div class="su-icon">📤</div>
+          <div class="su-title">Clique para selecionar ou arraste o arquivo aqui</div>
+          <div class="su-sub">Aceita imagens (JPG, PNG) e PDFs · RG, CPF, CTPS, Título de Eleitor, CNH, Comprovante de Residência...</div>
+          <button class="smart-upload-btn" onclick="event.stopPropagation();document.getElementById('smartFile_${idx}').click()">
+            📁 Escolher arquivo
+          </button>
+        </div>
+        <div class="smart-upload-progress" id="smartProgress_${idx}">
+          <div class="su-step" id="suStep_read_${idx}">
+            <span class="su-step-icon">📖</span>
+            <span class="su-step-text">Lendo documento...</span>
+          </div>
+          <div class="su-step" id="suStep_ai_${idx}">
+            <span class="su-step-icon">🧠</span>
+            <span class="su-step-text">IA analisando e extraindo dados...</span>
+          </div>
+          <div class="su-step" id="suStep_fill_${idx}">
+            <span class="su-step-icon">✏️</span>
+            <span class="su-step-text">Preenchendo campos...</span>
+          </div>
+          <div class="su-step" id="suStep_drive_${idx}">
+            <span class="su-step-icon">☁️</span>
+            <span class="su-step-text">Salvando no Google Drive...</span>
+          </div>
+          <div class="su-step" id="suStep_sheet_${idx}">
+            <span class="su-step-icon">📊</span>
+            <span class="su-step-text">Atualizando planilha...</span>
+          </div>
+          <div class="su-filled-fields" id="suFilledFields_${idx}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Checklist de Documentos</div>
+      <div class="docs-checklist">`;
+
+  DOC_DEFINITIONS.forEach(def => {
+    const val = d[def.key];
+    const has = val && val !== 'null' && val !== '';
+    const cls = has ? 'ok' : 'miss';
+    const isReq = REQUIRED.includes(def.key);
+    let statusTxt;
+    if (!has) {
+      statusTxt = '✗ Pendente';
+    } else if (def.type === 'doc') {
+      statusTxt = val === 'SIM' ? '✓ Enviado' : '✓ Recebido';
+    } else {
+      statusTxt = '✓ ' + val;
+    }
+    const editId = 'de_' + def.key;
+    const wrapId = 'dw_' + def.key;
+    body += `
+      <div class="doc-item ${cls}" id="di_${def.key}">
+        <div class="doc-icon ${cls}">${def.icon}</div>
+        <div style="min-width:0;flex:1">
+          <div class="doc-label">${def.label}${isReq ? ' <span style="color:var(--red);font-size:9px;font-weight:700;letter-spacing:0.5px;vertical-align:middle">★ OBRIG.</span>' : ''}</div>
+          <div class="doc-status ${cls}" id="ds_${def.key}" style="word-break:break-all">${statusTxt}</div>
+          <div class="doc-edit-wrap" id="${wrapId}">
+            <input class="edit-input" id="${editId}" placeholder="Digite o valor..." value="${has ? val : ''}">
+            <button class="save-btn" onclick="saveField('${def.key}', '${editId}', '${wrapId}', 'ds_${def.key}', 'di_${def.key}', ${idx})">Salvar</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          <button class="doc-edit-btn" onclick="toggleEditDoc('${wrapId}','${editId}')">✏ Editar</button>
+        </div>
+      </div>`;
+  });
+
+  body += `</div></div>`;
+
+  // Data sections
+  DATA_SECTIONS.forEach(section => {
+    const hasAny = section.fields.some(([k]) => d[k] && d[k] !== 'null');
+    body += `<div class="modal-section">
+      <div class="modal-section-title">${section.title}</div>
+      <div class="data-grid">`;
+    section.fields.forEach(([key, label]) => {
+      const val = d[key] && d[key] !== 'null' ? d[key] : null;
+      const isNum = NUMERIC_FIELDS.includes(key);
+      const editId = 'fe_' + key;
+      const wrapId = 'fw_' + key;
+      const valId  = 'fv_' + key;
+      body += `<div class="data-field">
+        <div class="data-label">${label}</div>
+        <div class="data-value ${val?'':'empty'} ${isNum&&val?'mono':''}" id="${valId}">${val||'não encontrado'}</div>
+        <div class="edit-input-wrap" id="${wrapId}">
+          <input class="edit-input" id="${editId}" placeholder="Digite o valor..." value="${val||''}">
+          <button class="save-btn" onclick="saveField('${key}','${editId}','${wrapId}','${valId}','',${idx})">Salvar</button>
+        </div>
+        <div class="data-field-btns">
+          <button class="edit-btn" onclick="toggleEdit('${wrapId}','${editId}')">✏ Editar</button>
+        </div>
+      </div>`;
+    });
+    body += `</div></div>`;
+  });
+
+  // Files section — will be updated after Drive load
+  body += `<div class="modal-section files-section" id="filesSection">
+    <div class="modal-section-title">Documentos Enviados</div>
+    <div class="files-grid" id="filesGrid">
+      <div style="color:var(--muted);font-size:13px;padding:8px">Carregando arquivos...</div>
+    </div>
+  </div>`;
+
+  document.getElementById('modalBody').innerHTML = body;
+
+  // Setup drag-and-drop on smart upload zone
+  const sZone = document.getElementById('smartZone_' + idx);
+  if (sZone) {
+    sZone.addEventListener('dragover', e => { e.preventDefault(); sZone.classList.add('dragover'); });
+    sZone.addEventListener('dragleave', () => sZone.classList.remove('dragover'));
+    sZone.addEventListener('drop', e => {
+      e.preventDefault();
+      sZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const input = document.getElementById('smartFile_' + idx);
+        // Create a DataTransfer to assign file to input
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        handleSmartDocUpload({ target: input }, idx);
+      }
+    });
+  }
+
+  setTimeout(() => {
+    const grid = document.getElementById('filesGrid');
+    if (!grid) return;
+    if (driveFiles.length === 0) {
+      grid.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Nenhum arquivo encontrado.</div>';
+      return;
+    }
+    const getMimeIcon = mt => {
+      if (mt.startsWith('image/')) return '🖼️';
+      if (mt.includes('pdf')) return '📄';
+      if (mt.includes('word')) return '📝';
+      return '📎';
+    };
+    grid.innerHTML = driveFiles.map(f => `
+      <div class="file-item">
+        <span class="file-icon">${getMimeIcon(f.mimeType)}</span>
+        <span class="file-name" title="${f.name}">${f.name}</span>
+        <div class="file-actions">
+          <button class="file-btn file-btn-view" onclick="viewDoc('${f.id}','${f.name.replace(/'/g,"\'")}','${f.mimeType}')">👁 Ver</button>
+          <a class="file-btn file-btn-dl" href="https://drive.google.com/uc?export=download&id=${f.id}" target="_blank">⬇</a>
+        </div>
+      </div>`).join('');
+  }, 100);
+
+  // Build missing docs list and WhatsApp link — based on REQUIRED fields only
+  const missingDocs = DOC_DEFINITIONS.filter(def => {
+    if (!REQUIRED.includes(def.key)) return false; // only required fields
+    const val = d[def.key];
+    return !val || val === 'null' || val === '';
+  });
+
+  const missingDiv = document.getElementById('modalMissingDocs');
+  const missingList = document.getElementById('modalMissingList');
+
+  if (missingDocs.length > 0 && telefone && telefone !== '—') {
+    const missingNames = missingDocs.map(def => def.label);
+    missingList.innerHTML = missingNames.map(n => `<div class="missing-doc-item">${n}</div>`).join('');
+
+    const realName = (d.NOME && d.NOME !== 'null' && d.NOME.trim() !== '') ? d.NOME : nome;
+    const firstName = realName.split(' ')[0];
+    const docsList = missingNames.map(n => '• ' + n).join('%0A');
+    const msg = `Olá ${firstName}! 👋%0A%0ASou da equipe de RH da ACMS Recrutamentos.%0A%0AVerificamos que ainda faltam os seguintes documentos no seu cadastro:%0A%0A${docsList}%0A%0APor favor, envie pelo WhatsApp para concluir seu cadastro. 😊%0A%0AObrigado!`;
+
+    const cleanPhone = telefone.replace(/\D/g, '');
+    const waPhone = cleanPhone.startsWith('55') ? cleanPhone : '55' + cleanPhone;
+
+    document.getElementById('btnWhatsApp').href = `https://web.whatsapp.com/send?phone=${waPhone}&text=${msg}`;
+    missingDiv.style.display = 'block';
+  } else {
+    missingDiv.style.display = 'none';
+  }
+
+}
+
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+let currentDocUrl = '';
+let currentDocName = '';
+
+async function viewDoc(fileId, fileName, mimeType) {
+  const overlay = document.getElementById('docViewerOverlay');
+  const body = document.getElementById('docViewerBody');
+  const title = document.getElementById('docViewerTitle');
+
+  title.textContent = fileName;
+  body.innerHTML = '<div class="doc-load">⏳ Carregando documento...</div>';
+  overlay.classList.add('open');
+
+  const isImg = mimeType.startsWith('image/');
+  const isPdf = mimeType.includes('pdf');
+
+  currentDocName = fileName;
+
+  try {
+    if (isImg) {
+      const b64 = await driveDownloadBase64(fileId);
+      const mime = mimeType === 'image/jpg' ? 'image/jpeg' : mimeType;
+      const src = `data:${mime};base64,${b64}`;
+      currentDocUrl = src;
+      body.innerHTML = `<img src="${src}" alt="${fileName}" style="max-width:100%;max-height:78vh;object-fit:contain;">`;
+    } else if (isPdf) {
+      // Use Google Drive viewer for PDFs
+      const viewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+      currentDocUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      body.innerHTML = `<iframe src="${viewUrl}" style="width:100%;height:78vh;border:none;"></iframe>`;
+    } else {
+      // Other files — open in Drive
+      const viewUrl = `https://drive.google.com/file/d/${fileId}/view`;
+      currentDocUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      body.innerHTML = `<div class="doc-load">
+        <p style="margin-bottom:16px;color:var(--muted2)">Este tipo de arquivo não pode ser visualizado diretamente.</p>
+        <a href="${viewUrl}" target="_blank" class="doc-btn doc-btn-view" style="display:inline-flex">Abrir no Google Drive</a>
+      </div>`;
+    }
+  } catch(e) {
+    body.innerHTML = `<div class="doc-load" style="color:var(--red)">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+function downloadCurrentDoc() {
+  if (!currentDocUrl) return;
+  const a = document.createElement('a');
+  a.href = currentDocUrl;
+  a.download = currentDocName || 'documento';
+  a.target = '_blank';
+  a.click();
+}
+
+function closeDocViewer() {
+  document.getElementById('docViewerOverlay').classList.remove('open');
+  document.getElementById('docViewerBody').innerHTML = '<div class="doc-load">Carregando...</div>';
+  currentDocUrl = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeStatusPopup();
+    closeDocViewer();
+    closeModalDirect();
+  }
+});
+
+function toggleEdit(wrapId, inputId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const isOpen = wrap.classList.toggle('open');
+  if (isOpen) document.getElementById(inputId)?.focus();
+}
+
+function toggleEditDoc(wrapId, inputId) {
+  toggleEdit(wrapId, inputId);
+}
+
+async function saveField(fieldKey, inputId, wrapId, valueDisplayId, itemId, candidateIdx) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const newVal = input.value.trim();
+  if (!newVal) { alert('Digite um valor antes de salvar.'); return; }
+
+  const btn = input.nextElementSibling;
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+  try {
+    // Update in memory
+    const d = extractedData[candidateIdx];
+    if (!d) throw new Error('Candidato não encontrado.');
+    d[fieldKey] = newVal;
+
+    // Update STATUS
+    d.STATUS_EXTRACAO = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '') ? 'Completo' : 'Incompleto';
+    d.ULTIMA_EXTRACAO = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+    // Save to Google Sheets
+    const inSheet = sheetRows[d.FOLDER_ID];
+    await saveToSheet(d, inSheet);
+
+    // Update display
+    const valEl = document.getElementById(valueDisplayId);
+    if (valEl) {
+      valEl.textContent = '✓ ' + newVal;
+      valEl.className = valEl.className.replace('miss','ok').replace('empty','');
+    }
+
+    // Update doc-item class if it's a checklist item
+    if (itemId) {
+      const item = document.getElementById(itemId);
+      if (item) { item.className = item.className.replace('miss','ok'); }
+    }
+
+    // Close edit wrap
+    const wrap = document.getElementById(wrapId);
+    if (wrap) wrap.classList.remove('open');
+
+    // Rebuild cards and table to reflect update
+    buildCandidateCards();
+    buildResultsTable();
+
+    if (btn) { btn.textContent = '✓ Salvo!'; }
+    setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; } }, 2000);
+
+  } catch(e) {
+    alert('Erro ao salvar: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar'; }
+  }
+}
+
+
+
+
+// ── AI Document Upload & Extraction ──
+function toggleAiUpload(wrapId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  const isOpen = wrap.style.display === 'flex';
+  wrap.style.display = isOpen ? 'none' : 'flex';
+}
+
+// ── Smart AI Upload — upload one document, extract ALL fields automatically ──
+async function handleSmartDocUpload(event, candidateIdx) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Reset file input for re-use
+  event.target.value = '';
+
+  const zone = document.getElementById('smartZone_' + candidateIdx);
+  const progress = document.getElementById('smartProgress_' + candidateIdx);
+  const filledFields = document.getElementById('suFilledFields_' + candidateIdx);
+
+  // Steps
+  const steps = {
+    read:  document.getElementById('suStep_read_'  + candidateIdx),
+    ai:    document.getElementById('suStep_ai_'    + candidateIdx),
+    fill:  document.getElementById('suStep_fill_'  + candidateIdx),
+    drive: document.getElementById('suStep_drive_' + candidateIdx),
+    sheet: document.getElementById('suStep_sheet_' + candidateIdx),
+  };
+
+  function setStep(key, state, msg) {
+    const el = steps[key];
+    if (!el) return;
+    el.className = 'su-step ' + state;
+    const icons = { active:'⏳', done:'✅', error:'❌' };
+    el.querySelector('.su-step-icon').textContent = { read:'📖', ai:'🧠', fill:'✏️', drive:'☁️', sheet:'📊' }[key];
+    if (state === 'active') el.querySelector('.su-step-icon').textContent = '⏳';
+    if (state === 'done')   el.querySelector('.su-step-icon').textContent = '✅';
+    if (state === 'error')  el.querySelector('.su-step-icon').textContent = '❌';
+    if (msg) el.querySelector('.su-step-text').textContent = msg;
+  }
+
+  // Show progress
+  if (progress) { progress.style.display = 'block'; }
+  if (filledFields) filledFields.innerHTML = '';
+  Object.keys(steps).forEach(k => setStep(k, '', ({
+    read:'Lendo documento...', ai:'IA analisando e extraindo dados...',
+    fill:'Preenchendo campos...', drive:'Salvando no Google Drive...', sheet:'Atualizando planilha...'
+  })[k]));
+
+  try {
+    // ── Step 1: Read file ──
+    setStep('read', 'active');
+    const b64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+    setStep('read', 'done', `Arquivo lido: ${file.name}`);
+
+    // ── Step 2: Claude extraction ──
+    setStep('ai', 'active', `Identificando documento e extraindo dados...`);
+
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type.includes('pdf');
+    const safeMime = isImage
+      ? (['image/jpeg','image/jpg','image/png','image/webp','image/gif'].includes(file.type)
+          ? (file.type === 'image/jpg' ? 'image/jpeg' : file.type)
+          : 'image/jpeg')
+      : 'application/pdf';
+
+    const promptText = `Você é um especialista em extração de dados de documentos brasileiros.
+
+Analise este documento e extraia TODOS os campos possíveis retornando SOMENTE um JSON válido, sem explicações, sem markdown, sem texto adicional.
+
+Campos a extrair (deixe null se não encontrado):
+{
+  "DOCUMENTO_TIPO": "tipo do documento identificado (ex: RG, CPF, CTPS, Título de Eleitor, CNH, Comprovante de Residência, Certidão de Nascimento, PIS, etc)",
+  "NOME": "nome completo",
+  "DATA_NASCIMENTO": "DD/MM/AAAA",
+  "NUMERO_CPF": "000.000.000-00",
+  "RG_NUMERO": "número do RG",
+  "RG_ORGAO_EMISSOR": "SSP, DETRAN, etc",
+  "RG_UF": "sigla do estado",
+  "RG_DATA_EXPEDICAO": "DD/MM/AAAA",
+  "RG_FRENTE": "SIM se é frente do RG, senão null",
+  "RG_VERSO": "SIM se é verso do RG, senão null",
+  "NUMERO_CPF": "somente números formatados",
+  "NUMERO_PIS": "número PIS/PASEP",
+  "NUMERO_CTPS": "número da carteira de trabalho",
+  "SERIE_CTPS": "série da CTPS",
+  "UF_CTPS": "UF da CTPS",
+  "NUMERO_TITULO_ELEITOR": "número do título",
+  "ZONA_ELEITOR": "zona eleitoral",
+  "SECAO_ELEITOR": "seção eleitoral",
+  "NUMERO_RESERVISTA": "número do certificado de reservista",
+  "NOME_PAI": "nome completo do pai",
+  "NOME_MAE": "nome completo da mãe",
+  "ENDERECO": "logradouro (rua/avenida)",
+  "NUMERO_ENDERECO": "número",
+  "COMPLEMENTO": "complemento",
+  "BAIRRO": "bairro",
+  "CIDADE": "cidade",
+  "ESTADO": "sigla UF",
+  "CEP": "00000-000",
+  "DADOS_BANCARIOS": "banco, agência, conta",
+  "CHAVE_PIX": "chave pix",
+  "METODO_PIX": "tipo (CPF/Email/Telefone/Aleatória)",
+  "CURRICULO": "SIM se for currículo",
+  "FOTO_SELFIE": "SIM se for selfie/foto do rosto",
+  "ATESTADO_ANTECEDENTES": "SIM se for atestado de antecedentes criminais",
+  "NOME_EMPRESA_ATUAL": "empresa atual (se currículo)",
+  "CARGO_ATUAL": "cargo atual (se currículo)"
+}
+
+Retorne APENAS o JSON, sem nenhum texto antes ou depois.`;
+
+    let apiBody;
+    if (isImage) {
+      apiBody = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: safeMime, data: b64 } },
+          { type: 'text', text: promptText }
+        ]}]
+      };
+    } else if (isPdf) {
+      apiBody = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+          { type: 'text', text: promptText }
+        ]}]
+      };
+    } else {
+      throw new Error('Formato não suportado. Use imagem ou PDF.');
+    }
+
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        
+        'anthropic-version': '2023-06-01',
+        
+      },
+      body: JSON.stringify(apiBody)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      throw new Error('API ' + resp.status + ': ' + errText.substring(0, 100));
+    }
+
+    const apiData = await resp.json();
+    const rawText = (apiData.content?.[0]?.text || '').replace(/```json|```/g, '').trim();
+    let extracted;
+    try { extracted = JSON.parse(rawText); }
+    catch(e) { throw new Error('Resposta inválida da IA: ' + rawText.substring(0, 80)); }
+
+    const docType = extracted.DOCUMENTO_TIPO || 'Documento';
+    setStep('ai', 'done', `Identificado: ${docType}`);
+
+    // ── Step 3: Fill fields ──
+    setStep('fill', 'active');
+    const d = extractedData[candidateIdx];
+    if (!d) throw new Error('Candidato não encontrado.');
+
+    const FIELD_KEYS = [
+      'NOME','DATA_NASCIMENTO','NUMERO_CPF','RG_NUMERO','RG_ORGAO_EMISSOR','RG_UF','RG_DATA_EXPEDICAO',
+      'RG_FRENTE','RG_VERSO','NUMERO_PIS','NUMERO_CTPS','SERIE_CTPS','UF_CTPS',
+      'NUMERO_TITULO_ELEITOR','ZONA_ELEITOR','SECAO_ELEITOR','NUMERO_RESERVISTA',
+      'NOME_PAI','NOME_MAE','ENDERECO','NUMERO_ENDERECO','COMPLEMENTO','BAIRRO',
+      'CIDADE','ESTADO','CEP','DADOS_BANCARIOS','CHAVE_PIX','METODO_PIX',
+      'CURRICULO','FOTO_SELFIE','ATESTADO_ANTECEDENTES','NOME_EMPRESA_ATUAL','CARGO_ATUAL'
+    ];
+
+    const filled = [];
+    FIELD_KEYS.forEach(key => {
+      const val = extracted[key];
+      if (!val || val === 'null' || val === null) return;
+      d[key] = val;
+      filled.push(key);
+
+      // Update checklist status display
+      const dsEl = document.getElementById('ds_' + key);
+      const diEl = document.getElementById('di_' + key);
+      const deEl = document.getElementById('de_' + key);
+      const dwEl = document.getElementById('dw_' + key);
+      if (dsEl) {
+        const def = DOC_DEFINITIONS.find(dd => dd.key === key);
+        const isSim = (val === 'SIM');
+        dsEl.textContent = isSim ? '✓ Enviado' : ('✓ ' + val);
+        dsEl.className = dsEl.className.replace('miss','ok');
+      }
+      if (diEl) diEl.className = diEl.className.replace('miss','ok');
+      if (deEl) deEl.value = val;
+
+      // Update data section display
+      const fvEl = document.getElementById('fv_' + key);
+      const feEl = document.getElementById('fe_' + key);
+      if (fvEl) {
+        fvEl.textContent = val;
+        fvEl.className = fvEl.className.replace('empty','');
+      }
+      if (feEl) feEl.value = val;
+    });
+
+    if (filledFields) {
+      filledFields.innerHTML = filled.length > 0
+        ? filled.map(k => `<span class="su-field-tag">${k.replace(/_/g,' ')}</span>`).join('')
+        : '<span style="color:var(--muted);font-size:11px">Nenhum campo novo encontrado.</span>';
+    }
+
+    setStep('fill', 'done', `${filled.length} campo(s) preenchido(s)`);
+
+    // ── Step 4: Upload to Drive ──
+    setStep('drive', 'active');
+    const folderId = d._folderId || d.FOLDER_ID;
+    if (folderId && accessToken) {
+      try {
+        const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
+        const uploadName = `${docType.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim()}${ext ? '.' + ext : '_' + file.name}`;
+        const uploaded = await driveUploadFile(file, folderId, uploadName);
+        setStep('drive', 'done', `Salvo: ${uploaded.name}`);
+
+        // Update files grid
+        const filesGrid = document.getElementById('filesGrid');
+        if (filesGrid && d._files) {
+          d._files.push({ id: uploaded.id, name: uploaded.name, mimeType: uploaded.mimeType || file.type });
+          const getMimeIcon = mt => {
+            if (mt && mt.startsWith('image/')) return '🖼️';
+            if (mt && mt.includes('pdf')) return '📄';
+            return '📎';
+          };
+          filesGrid.innerHTML = d._files.map(f => `
+            <div class="file-item">
+              <span class="file-icon">${getMimeIcon(f.mimeType)}</span>
+              <span class="file-name" title="${f.name}">${f.name}</span>
+              <div class="file-actions">
+                <button class="file-btn file-btn-view" onclick="viewDoc('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.mimeType}')">👁 Ver</button>
+                <a class="file-btn file-btn-dl" href="https://drive.google.com/uc?export=download&id=${f.id}" target="_blank">⬇</a>
+              </div>
+            </div>`).join('');
+        }
+      } catch(driveErr) {
+        setStep('drive', 'error', 'Erro ao salvar no Drive: ' + driveErr.message);
+      }
+    } else {
+      setStep('drive', 'done', accessToken ? 'Pasta não encontrada — pulando.' : 'Drive não conectado — pulando.');
+    }
+
+    // ── Step 5: Save to Sheet ──
+    setStep('sheet', 'active');
+    try {
+      d.STATUS_EXTRACAO = REQUIRED.every(k => d[k] && d[k] !== 'null' && d[k] !== '') ? 'Completo' : 'Incompleto';
+      d.ULTIMA_EXTRACAO = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+      const inSheet = sheetRows[d.FOLDER_ID];
+      await saveToSheet(d, inSheet);
+      setStep('sheet', 'done', 'Planilha atualizada!');
+    } catch(sheetErr) {
+      setStep('sheet', 'error', 'Erro na planilha: ' + sheetErr.message);
+    }
+
+    // Rebuild cards + table
+    buildCandidateCards();
+    buildResultsTable();
+
+  } catch(e) {
+    if (progress) progress.style.display = 'block';
+    // Mark remaining steps as errored
+    Object.keys(steps).forEach(k => {
+      if (steps[k] && !steps[k].classList.contains('done')) {
+        setStep(k, 'error', k === 'read' || k === 'ai' ? 'Erro: ' + e.message : '—');
+      }
+    });
+  }
+}
+
+
+
+async function handleAiFileUpload(event, fieldKey, candidateIdx) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const nameEl = document.getElementById('aifile_' + fieldKey);
+  const statusEl = document.getElementById('aistatus_' + fieldKey);
+
+  if (nameEl) nameEl.textContent = file.name;
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--yellow)">⏳ Enviando para IA...</span>';
+
+  try {
+    // Read file as base64
+    const b64 = await new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result.split(',')[1]);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+
+    const isImage = file.type.startsWith('image/');
+    const isPdf = file.type.includes('pdf');
+    const mime = file.type || 'application/octet-stream';
+
+    // Build prompt focused on extracting data for this specific field
+    const fieldDef = DOC_DEFINITIONS.find(d => d.key === fieldKey);
+    const fieldLabel = fieldDef ? fieldDef.label : fieldKey;
+
+    const fieldInstructions = {
+      NUMERO_CPF: 'Extraia SOMENTE o número do CPF no formato 000.000.000-00. Retorne apenas o número, sem texto adicional.',
+      RG_NUMERO: 'Extraia SOMENTE o número do RG (ex: 56.377.287-6). Retorne apenas o número.',
+      RG_ORGAO_EMISSOR: 'Extraia SOMENTE o órgão emissor do RG (ex: SSP). Retorne apenas a sigla.',
+      RG_UF: 'Extraia SOMENTE a UF do RG (ex: SP). Retorne apenas a sigla do estado.',
+      RG_DATA_EXPEDICAO: 'Extraia SOMENTE a data de expedição do RG no formato DD/MM/AAAA.',
+      RG_FRENTE: 'Se este documento é a frente de um RG, retorne "SIM". Caso contrário retorne "NAO".',
+      RG_VERSO: 'Se este documento é o verso de um RG, retorne "SIM". Caso contrário retorne "NAO".',
+      NUMERO_PIS: 'Extraia SOMENTE o número do PIS/PASEP (11 dígitos com pontos e traço). Retorne apenas o número.',
+      NUMERO_CTPS: 'Extraia SOMENTE o número da Carteira de Trabalho (CTPS). Retorne apenas o número.',
+      SERIE_CTPS: 'Extraia SOMENTE a série da Carteira de Trabalho (CTPS). Retorne apenas o número da série.',
+      UF_CTPS: 'Extraia SOMENTE a UF da Carteira de Trabalho (CTPS). Retorne apenas a sigla do estado.',
+      NUMERO_TITULO_ELEITOR: 'Extraia SOMENTE o número do Título de Eleitor. Retorne apenas os dígitos.',
+      ZONA_ELEITOR: 'Extraia SOMENTE o número da Zona Eleitoral. Retorne apenas o número.',
+      SECAO_ELEITOR: 'Extraia SOMENTE o número da Seção Eleitoral. Retorne apenas o número.',
+      NUMERO_RESERVISTA: 'Extraia SOMENTE o número do Certificado de Reservista. Retorne apenas o número.',
+      NOME_PAI: 'Extraia SOMENTE o nome completo do pai. Retorne apenas o nome.',
+      NOME_MAE: 'Extraia SOMENTE o nome completo da mãe. Retorne apenas o nome.',
+      DATA_NASCIMENTO: 'Extraia SOMENTE a data de nascimento no formato DD/MM/AAAA. Retorne apenas a data.',
+      ENDERECO: 'Extraia SOMENTE o logradouro (nome da rua/avenida). Retorne apenas o logradouro.',
+      NUMERO_ENDERECO: 'Extraia SOMENTE o número do endereço. Retorne apenas o número.',
+      BAIRRO: 'Extraia SOMENTE o nome do bairro. Retorne apenas o bairro.',
+      CIDADE: 'Extraia SOMENTE o nome da cidade. Retorne apenas a cidade.',
+      ESTADO: 'Extraia SOMENTE a sigla do estado (UF). Retorne apenas a sigla.',
+      CEP: 'Extraia SOMENTE o CEP no formato 00000-000. Retorne apenas o CEP.',
+      DADOS_BANCARIOS: 'Extraia os dados bancários completos (banco, agência, conta). Retorne em formato: Banco X | Ag: 0000 | Conta: 00000-0.',
+      CHAVE_PIX: 'Extraia SOMENTE a chave PIX. Retorne apenas a chave.',
+      METODO_PIX: 'Extraia SOMENTE o tipo da chave PIX (CPF, Email, Telefone, Aleatória). Retorne apenas o tipo.',
+      CURRICULO: 'Se este é um currículo, retorne "SIM". Caso contrário retorne "NAO".',
+      FOTO_SELFIE: 'Se esta é uma foto selfie (rosto da pessoa), retorne "SIM". Caso contrário retorne "NAO".',
+      ATESTADO_ANTECEDENTES: 'Se este é um atestado de antecedentes criminais, retorne "SIM". Caso contrário retorne "NAO".',
+      NOME: 'Extraia SOMENTE o nome completo da pessoa. Retorne apenas o nome.',
+      NOME_EMPRESA_ATUAL: 'Extraia SOMENTE o nome da empresa atual. Retorne apenas o nome.',
+      CARGO_ATUAL: 'Extraia SOMENTE o cargo atual. Retorne apenas o cargo.',
+    };
+
+    const instruction = fieldInstructions[fieldKey] || `Extraia o campo "${fieldLabel}" deste documento. Retorne apenas o valor encontrado, sem explicações.`;
+
+    const prompt = `Você é um extrator especializado de dados de documentos brasileiros.\n\n${instruction}\n\nResposta deve ser SOMENTE o valor extraído, sem explicações, sem formatação adicional.`;
+
+    let body;
+    if (isImage) {
+      const safeMime = ['image/jpeg','image/jpg','image/png','image/webp','image/gif'].includes(file.type)
+        ? (file.type === 'image/jpg' ? 'image/jpeg' : file.type)
+        : 'image/jpeg';
+      body = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: safeMime, data: b64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      };
+    } else if (isPdf) {
+      body = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      };
+    } else {
+      // Text file — decode and send as text
+      const textContent = atob(b64);
+      body = {
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{
+          role: 'user',
+          content: `${prompt}\n\nConteúdo do documento:\n${textContent.substring(0, 4000)}`
+        }]
+      };
+    }
+
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        
+        'anthropic-version': '2023-06-01',
+        
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      throw new Error('API ' + resp.status + ': ' + errText.substring(0, 100));
+    }
+
+    const data = await resp.json();
+    const extracted = (data.content?.[0]?.text || '').trim();
+
+    if (!extracted || extracted === 'NAO' || extracted === 'null') {
+      if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">⚠ Dado não encontrado no documento.</span>';
+      // Still try to upload the file to Drive even if data wasn't extracted
+    } else {
+      if (statusEl) statusEl.innerHTML = `<span style="color:var(--green)">✓ Extraído: <strong>${extracted}</strong> — salvando no Drive...</span>`;
+
+      // Pre-fill the edit input with extracted value and open edit wrap
+      const editInput = document.getElementById('de_' + fieldKey);
+      const editWrap = document.getElementById('dw_' + fieldKey);
+      if (editInput) {
+        editInput.value = extracted;
+        if (editWrap) editWrap.classList.add('open');
+        editInput.focus();
+      }
+
+      // Also pre-fill data section input if exists
+      const dataInput = document.getElementById('fe_' + fieldKey);
+      const dataWrap = document.getElementById('fw_' + fieldKey);
+      if (dataInput) {
+        dataInput.value = extracted;
+        if (dataWrap) dataWrap.classList.add('open');
+      }
+    }
+
+    // ── Upload file to candidate's Drive folder ──
+    const cand = extractedData[candidateIdx];
+    const folderId = cand?._folderId || cand?.FOLDER_ID;
+    if (folderId && accessToken) {
+      try {
+        if (statusEl) {
+          const cur = statusEl.innerHTML;
+          statusEl.innerHTML = cur.replace('salvando no Drive...','') +
+            '<span style="color:var(--blue)"> ⬆ Enviando para o Drive...</span>';
+        }
+        // Build a descriptive filename: fieldLabel_originalName
+        const fieldDef2 = DOC_DEFINITIONS.find(dd => dd.key === fieldKey);
+        const prefix = fieldDef2 ? fieldDef2.label.replace(/[^a-zA-Z0-9À-ÿ ]/g,'').trim() : fieldKey;
+        const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
+        const uploadName = `${prefix}${ext ? '.' + ext : '_' + file.name}`;
+        const uploaded = await driveUploadFile(file, folderId, uploadName);
+        if (statusEl) {
+          const prevExtracted = extracted && extracted !== 'NAO' && extracted !== 'null'
+            ? `<span style="color:var(--green)">✓ Extraído: <strong>${extracted}</strong></span> · `
+            : '<span style="color:var(--yellow)">⚠ Dado não encontrado</span> · ';
+          statusEl.innerHTML = prevExtracted +
+            `<span style="color:var(--green)">✓ Salvo no Drive: <strong>${uploaded.name}</strong></span>`;
+        }
+        // Refresh the files list in the modal if present
+        const filesGrid = document.getElementById('filesGrid');
+        if (filesGrid && cand._files) {
+          cand._files.push({ id: uploaded.id, name: uploaded.name, mimeType: uploaded.mimeType || file.type });
+          const getMimeIcon = mt => {
+            if (mt && mt.startsWith('image/')) return '🖼️';
+            if (mt && mt.includes('pdf')) return '📄';
+            if (mt && mt.includes('word')) return '📝';
+            return '📎';
+          };
+          filesGrid.innerHTML = cand._files.map(f => `
+            <div class="file-item">
+              <span class="file-icon">${getMimeIcon(f.mimeType)}</span>
+              <span class="file-name" title="${f.name}">${f.name}</span>
+              <div class="file-actions">
+                <button class="file-btn file-btn-view" onclick="viewDoc('${f.id}','${f.name.replace(/'/g,"\\'")}','${f.mimeType}')">👁 Ver</button>
+                <a class="file-btn file-btn-dl" href="https://drive.google.com/uc?export=download&id=${f.id}" target="_blank">⬇</a>
+              </div>
+            </div>`).join('');
+        }
+      } catch(uploadErr) {
+        if (statusEl) statusEl.innerHTML += `<br><span style="color:var(--red)">⚠ Erro ao salvar no Drive: ${uploadErr.message}</span>`;
+      }
+    } else if (!accessToken) {
+      if (statusEl) statusEl.innerHTML += '<br><span style="color:var(--muted2)">ℹ Drive não conectado — arquivo não foi salvo na pasta.</span>';
+    }
+
+  } catch(e) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--red)">✗ Erro: ${e.message}</span>`;
+  }
+
+  // Reset file input so same file can be re-selected
+  event.target.value = '';
+}
+
+// ── Manual status from modal (Step 4) ──
+async function manualSetStatusFromModal(idx, newStatus) {
+  const d = extractedData[idx];
+  if (!d) return;
+  const folderId = d.FOLDER_ID;
+  await manualSetStatus(folderId, newStatus);
+  // Refresh the modal header chip color too
+  const badge = document.querySelector('#modalOverlay .chip');
+  if (badge) {
+    const isOk = newStatus === 'Completo';
+    badge.className = `chip ${isOk ? 'chip-ok' : 'chip-warn'}`;
+    badge.textContent = isOk ? '✓ Completo' : '⚠ Incompleto';
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const main = document.querySelector('.main');
+  const btn = document.getElementById('sidebarToggle');
+  const collapsed = sb.classList.toggle('collapsed');
+  if (main) main.classList.toggle('expanded', collapsed);
+  btn.textContent = collapsed ? '›' : '‹';
+  btn.title = collapsed ? 'Expandir menu' : 'Recolher menu';
+}
+
+function resetAll() {
+  extractedData=[]; newCount=0; updateCount=0; skipCount=0; totalFolders=0;
+  newCandidateIds = new Set();
+  accessToken=null; candidateFolders=[]; sheetRows={};
+  document.getElementById('logBox').innerHTML='';
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('progressPct').textContent='0%';
+  document.getElementById('btnProcess').disabled=false;
+  document.getElementById('btnProcess').textContent='Iniciar Extração';
+  document.getElementById('navBadge').style.display='none';
+  setDot('dotDrive',false); setDot('dotSheets',false);
+  goStep(1);
+}
+</script>
+
+
+</body></html>
